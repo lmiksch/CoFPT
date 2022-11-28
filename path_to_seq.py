@@ -3,7 +3,6 @@ Takes a folding path in form a list of pertables as input and puts out a domain 
 Folding path should be at any times satured and  free from pseudo-knots
 """
 import  string
-import re
 class domain():
     def __init__(self,name,praefix,suffix,star):
         self.name = name
