@@ -90,7 +90,7 @@ def nussinov(rna):
 	rna = convert(rna)
 	nm = init_matrix(rna)
 	nm = fill(nm, rna)
-	print(nm)
+	#print(nm)
 	structures = []
 	for x in range(0,len(rna)+1):
 		fold = []
@@ -99,6 +99,8 @@ def nussinov(rna):
 		res = dot_write(rna, fold,x)
 		structures.append(res)
 	return(structures)
+
+
 def convert(string):
 	counts = string.count("*")
 	c_string = list(string)
@@ -111,7 +113,20 @@ def convert(string):
 
 	c_string = "".join(c_string)
 	return c_string
-    
+
+
+def  convert_nussi_output(output,seq):
+	struct = []
+
+	for x in range(len(seq)):
+		if seq[x] == "b":
+			struct.append(output[x])
+	struct = "".join(struct)
+	#print(struct)		
+	return struct
+
+"""
+print("asdasdakjsdlkj:",convert_nussi_output("(((.(.).)))","abclblblcba"))    
 
 rna = "AaAaAaAaaaaaAAAA"
 
@@ -121,10 +136,10 @@ test = "bla*b*c*ldcbaele*a*b*c*d*"
 
 
 
-
-
-
-
 for struct in nussinov(string):
 	print(struct)
 	print(convert(test))
+"""
+
+
+

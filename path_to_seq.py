@@ -91,11 +91,11 @@ def fold_to_seq(path):
         module = "".join(globals()["block%s" %x].praefix + globals()["block%s" %x].name + globals()["block%s" %x].suffix)
         modules.append(module)
 
-    print(modules)
+    #print(modules)
     final_seq = "l".join(modules)
     
 
-    print("done")
+    #print("done")
     return final_seq
 
 def stars(string):
@@ -106,7 +106,7 @@ def stars(string):
 path2 = [[1,0],[2,2,1],[3,0,3,2],[4,4,3,2,1],[5,2,1,4,3,0],[6,2,1,6,5,4,3]]
 path = [[1,0],[2,2,1],[3,0,3,2],[4,2,1,4,3]]
 
-print(fold_to_seq(path))
+#print(fold_to_seq(path))
         
 
 
