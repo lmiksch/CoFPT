@@ -2,14 +2,25 @@ from path_to_seq import *
 from nussi2 import *
 from path_generator import * 
 from convert_functions import *
+import argparse
 
-seq = "aA"*2
+parser = argparse.ArgumentParser(
+                    prog = 'Path_to_Seq_test',
+                    description = 'This programm test the path_to_seq progam. By calculating the folding path via nussinov algorithm and the comparing it to the input path',
+                    epilog = 'Text at the bottom of help')
+
+parser.add_argument("-length", metavar = "length of the test sequence", default= 4, help="Input for the length of the sequence which will be tested",type = int)
+parser.add_argument("-t", metavar = "Number of Random Paths", default= 10, help="Input for how many random paths are generated",type = int)
+
+args = parser.parse_args()
+
+seq = "aA" * args.length
 calculated_sequences = []
 possible_paths = generate_foldingpaths(seq)
 
 paths = []
 print("Generating Random Paths")
-for k in range(10):
+for k in range(args.t):
     paths.append(get_random_path(generate_foldingpaths(seq)))
     
 for path in paths:
