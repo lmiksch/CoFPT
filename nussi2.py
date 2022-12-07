@@ -125,6 +125,53 @@ def  convert_nussi_output(output,seq):
 	#print(struct)		
 	return struct
 
+
+def module_folding_path(structures,seq):
+	"""Takes output of nussinov algorithm and converts it just to the folding path of the b domain for comparison against the input path. 
+		It will only consider adding the strucure after a module has fully transcribed. 
+
+		Args: 
+			Structure(list): Output of nussinov algorithm 
+			seq(str): sequences which was used in the nussinov algorithm
+		
+		Returns: 
+			module_structure(list): 
+	"""
+	modules = seq.split("l")
+	seq = convert(seq)
+
+	module_path = []
+
+	lengths = [0 for x in modules]
+
+	for x in range(len(modules)):
+		for z in range(x+1):
+			lengths[x] = len(modules[z]) + lengths[x] 
+	t = 1 
+	for x in range(len(seq)):
+		if seq[x] == "l":
+			lengths[t] += t 
+			t += 1
+
+	for x in range(len(lengths)):
+		module_path.append(structures[lengths[x]])
+	liste = [[] for x in module_path]
+
+
+	for x in range(len(module_path)):
+		for z in range(len(module_path[x])):
+			if seq[z] == "b" or seq[z] == "B":
+				liste[x].append(module_path[x][z])
+		
+	for x in range(len(liste)):
+		liste[x] = "".join(liste[x])
+	return(liste)	
+		
+
+
+
+
+
 """
 print("asdasdakjsdlkj:",convert_nussi_output("(((.(.).)))","abclblblcba"))    
 
@@ -138,8 +185,7 @@ test = "bla*b*c*ldcbaele*a*b*c*d*"
 
 for struct in nussinov(string):
 	print(struct)
-	print(convert(test))
+	print(convert(string))
+
+module_folding_path(nussinov(string),convert(string))
 """
-
-
-

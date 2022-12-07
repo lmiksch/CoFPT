@@ -19,8 +19,9 @@ def find_structs(seq):
             for y in range(len(seq)):
                 if couple((seq[x],seq[y])):
                     possible_pairs[x].append(y)
-
+    #print("possible pairs",possible_pairs)
     allpairs = find_all_pairs(possible_pairs)
+    #print("allpairs:",allpairs)
 
     #print("allpairs:", allpairs)
     paired = [-1 for x in range(len(seq))]
@@ -28,7 +29,11 @@ def find_structs(seq):
     global final
     final = []
     find_all_combinations(allpairs,0,[],paired)
-    #print("final",final)
+    
+
+
+
+
 
     p_list_final = []
     for x in final:
@@ -43,9 +48,9 @@ def find_structs(seq):
     for x in p_list_final:
         #print("x = :",x)
         final_structures.append(pertable_to_struct(x))
-    
-    #print(final_structures)
+   
 
+    final_structures = [i for i in final_structures if i is not None]
     return final_structures
 
 
@@ -86,7 +91,6 @@ def translate(t_list,seq):
             p_table[t_list[x][0]] = t_list[x][1] + 1
             p_table[t_list[x][1]] = t_list[x][0] + 1
     p_table.insert(0,len(seq))
-
     return p_table
 
 def pertable_to_struct(pertable):
@@ -99,7 +103,9 @@ def pertable_to_struct(pertable):
             struct.append(")")
         elif pertable[i] == 0:
             struct.append(".")
-        
+    for x in range(1,len(struct)-1):
+        if struct[x] == ".":
+            return    
     struct = ("".join(struct))
     
     return struct
@@ -110,24 +116,24 @@ def generate_foldingpaths(seq):
     folding_paths = []
     for x in range(0,len(seq)+1):
         folding_paths.append(find_structs(seq[:x]))
+    
 
     return folding_paths
 
 def get_random_path(folding_paths):
     path = []
-    for x in range(len(folding_paths)):
-        print("x",x)
+    for x in range(1,len(folding_paths)):
         path.append(folding_paths[x][random.randint(0,len(folding_paths[x])-1)])
 
     return(path)
 
-
-seq = "aAaAaAaAaAaA"
+"""
+seq = "aAaAaA"
 
 
 paths = generate_foldingpaths(seq)
 
-print("paths")
+print("paths")(seq)
 print(len(paths))
 
 for x in paths:
@@ -137,7 +143,16 @@ for x in paths:
 print(get_random_path(paths))
 
 
-#find_structs("aAaAaAaAaAaA")
+find_structs("aAaAaAaAaAaA")
 
+seq = "aAaAaA"
+paths =[]
+print("Generating Random Paths")
+for k in range(10):
+    paths.append(get_random_path(generate_foldingpaths(seq)))
 
+for path in paths:
+    print(path)
+
+"""
 

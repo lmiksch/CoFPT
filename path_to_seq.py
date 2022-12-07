@@ -18,6 +18,7 @@ def pertable_to_path(pertable):
     path = []
     for x in range(len(pertable)):
         struct = []
+        
         for i in range(1,pertable[x][0]+1):
             if pertable[x][i] > i:
                 struct.append("(")
@@ -36,9 +37,7 @@ def fold_to_seq(path):
     domains.remove("b")
     domains.remove("l")
     domain_pointer = 0
-    print("Following Path was given")
-    for x in pertable_to_path(path):
-        print(x)
+   
     #creates a list with the corresponding number of blocks  used in the folding path 
     seq = []
     used_domains = ["b"]
@@ -110,4 +109,4 @@ path = [[1,0],[2,2,1],[3,0,3,2],[4,2,1,4,3]]
         
 
 
-pertable_to_path(path)
+#print(fold_to_seq(path2))
