@@ -62,7 +62,7 @@ def check_paths(seq):
             print(calculated_path,"calculated from nussinov")
             print("calculated sequence:",calc_seq)
         print("\n")
-    print("Number of Succesfull attempts = ", succesfull)
+    print("Number of Succesfull attempts = ", succesfull,"/",args.t)
 
 def check_path(path): 
     """Takes a dot-bracket notation path and calculates the domain level sequence and then checks with nussi if the calculated sequence is equal to the input sequence"""
