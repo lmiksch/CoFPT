@@ -134,7 +134,6 @@ def allready_paired(step,x,y,path):
     for i in range(1,step):
         try:
             if path[i][x] == y:
-                print("paired")
                 return True
         except:
             pass         
