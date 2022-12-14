@@ -14,14 +14,25 @@ parser.add_argument("-t", metavar = "Number of Random Paths", default= 10, help=
 
 args = parser.parse_args()
 
-seq = "aA" * args.length
+len = args.length / 2
+
+len = int(len)
+
+
+if args.length%2 == 0:
+    seq = "aA" * len
+
+else:
+    seq = "aA" * len + "a"
+
+
 calculated_sequences = []
 possible_paths = generate_foldingpaths(seq)
 
 paths = []
 print("Generating Random Paths")
 for k in range(args.t):
-    paths.append(get_random_path(generate_foldingpaths(seq)))
+    paths.append(get_random_path(possible_paths))
     
 for path in paths:
     print(path)
@@ -30,10 +41,12 @@ i = 0
 print("Checking if paths are equal")
 for path in paths:
     pertable_path = path_to_pertablepath(path)
-    seq = fold_to_seq(pertable_path)
-    calculated_sequences.append(seq)
-    nussinov_path = nussinov(seq)
-    calculated_path = module_folding_path(nussinov_path,convert(seq))
+    calc_seq = fold_to_seq(pertable_path)
+    conv_seq = convert_pts_out_to_nussi_in(calc_seq)
+    
+    calculated_sequences.append(conv_seq)
+    nussinov_path = nussinov(conv_seq)
+    calculated_path = module_folding_path(nussinov_path,convert(conv_seq))
     if calculated_path == path:
 
         print("works")
@@ -41,7 +54,7 @@ for path in paths:
         print("Error: Following Path does not match calulated path")
         print(path,"Input")
         print(calculated_path,"calculated from nussinov")
-        print("calculated sequence:",calculated_sequences[i])
+        print("calculated sequence:",calc_seq)
 
     i += 1    
 

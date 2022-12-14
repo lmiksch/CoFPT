@@ -1,19 +1,21 @@
 """
-Takes a folding path in form a list of pertables as input and puts out a domain level sequence which has the same folding path as the input
+Takes a folding path in form a list of pertables as input and puts out a block level sequence which has the same folding path as the input
 Folding path should be at any times satured and  free from pseudo-knots
 """
 import  string
-class domain():
+import re
+class module():
     def __init__(self,name,praefix,suffix,star):
         self.name = name
         self.praefix = praefix
         self.suffix = suffix
         self.star = star
 
+
     def __str__(self):
             return f"{self.praefix}{self.name}{self.suffix}"
 
-
+ 
 def pertable_to_path(pertable):
     path = []
     for x in range(len(pertable)):
@@ -34,28 +36,27 @@ def pertable_to_path(pertable):
 
 def fold_to_seq(path):
     domains = list(string.ascii_lowercase)
+    for x in range(len(string.ascii_lowercase)):
+        for  z in range(len(string.ascii_lowercase)):
+            domains.append(string.ascii_lowercase[x] + string.ascii_lowercase[z])
     domains.remove("b")
     domains.remove("l")
-    domain_pointer = 0
-   
+    domain_pointer = 0   
     #creates a list with the corresponding number of blocks  used in the folding path 
     seq = []
     used_domains = ["b"]
     for x in range(1, path[-1][0] + 1):
         
-        globals()["block%s" %  x] = domain("b","","","F")
+        globals()["block%s" %  x] = module("b","","",False)
         
         
         if x%2 != 0:
-            globals()["block%s" % x].star = "T"
+            globals()["block%s" % x].star = True
 
 
         seq.append(globals()["block%s" % x])
 
-    
-
     for x in range(1,len(path)): 
-        
         for y in range(1,len(path[x])-1):
                 z = False
                 try:
@@ -64,48 +65,61 @@ def fold_to_seq(path):
                 except:
                     pass
                 if path[x][y] > path[x-1][y] and path[x-1][y] > 0 and z == False:
-                    globals()["block%s" % y].praefix = domains[domain_pointer] + globals()["block%s" % y].praefix
+                    globals()["block%s" % y].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % y].praefix
                     domain_pointer += 1
-                    globals()["block%s" % y].suffix = globals()["block%s" % y].suffix + domains[domain_pointer]
+                    globals()["block%s" % y].suffix = globals()["block%s" % y].suffix+ " " + domains[domain_pointer]
 
-                    globals()["block%s" % path[x][y]].suffix = globals()["block%s" % y].praefix[::-1]
-                    globals()["block%s" % path[x][y]].praefix = globals()["block%s" % y].suffix[::-1]
+
+                    globals()["block%s" % path[x][y]].suffix =  globals()["block%s"  % y].praefix[::-1]
+                    globals()["block%s" % path[x][y]].praefix = globals()["block%s"  % y].suffix[::-1]
+                    domain_pointer += 1
+                if path[x][y+1] == 0:
+                    t = y -1
+                    globals()["block%s" % t].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % t].praefix
+                    domain_pointer += 1
+                    globals()["block%s" % t].suffix = globals()["block%s" % t].suffix+ " " + domains[domain_pointer]
+
+
+                    globals()["block%s" % y].suffix = globals()["block%s" % t].praefix[::-1]
+                    globals()["block%s" % y].praefix = globals()["block%s" % t].suffix[::-1]
                     domain_pointer += 1
 
     #part which adds * notation for complementary
 
     for x in range(1,len(seq)+1):
-        
-        if x % 2 == 0: 
+        if globals()["block%s" %x].star == False: 
             #globals()["block%s" %x] = "*".join(re.findall("",globals()["block%s" %x].praefix))
-
             globals()["block%s" %x].praefix = stars(globals()["block%s" %x].praefix)
             globals()["block%s" %x].suffix = stars(globals()["block%s" %x].suffix)
             globals()["block%s" %x].name = stars(globals()["block%s" %x].name)  
 
-    #part which adds extenstion domain l 
+    #part which adds extenstion block l 
 
-    modules = []
+    comb_modules = []
     for x in range(1,len(seq)+1):
-        module = "".join(globals()["block%s" %x].praefix + globals()["block%s" %x].name + globals()["block%s" %x].suffix)
-        modules.append(module)
+        comb_module = globals()["block%s" %x].praefix + " " + globals()["block%s" %x].name + " " + globals()["block%s" %x].suffix
+        comb_modules.append(comb_module)
 
-    #print(modules)
-    final_seq = "l".join(modules)
+    
+    final_seq = "  l  ".join(comb_modules)
     
 
     #print("done")
     return final_seq
 
 def stars(string):
-    
-    new_string = '*'.join(string[i:i+1] for i in range(0, len(string)+1, 1))
+    string = string.split()
+    for x in range(len(string)):
+        string[x] = string[x] + "*"
+  
+    new_string = ' '.join(string)
     return new_string
 
-path2 = [[1,0],[2,2,1],[3,0,3,2],[4,4,3,2,1],[5,2,1,4,3,0],[6,2,1,6,5,4,3]]
-path = [[1,0],[2,2,1],[3,0,3,2],[4,2,1,4,3]]
 
-#print(fold_to_seq(path))
+path2 = [[1,0],[2,2,1],[3,1,2,0],[4,4,3,2,1]]
+path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
+
+print(fold_to_seq(path2))
         
 
 

@@ -1,5 +1,5 @@
 def path_to_pertablepath(path):
-    """ Function wich turns a structurral path in dot bracket annotation into a pertable path
+    """ Function which turns a structurral path in dot bracket annotation into a pertable path
 
     args: 
         path(list): List of the folding path in dot bracket
@@ -7,7 +7,7 @@ def path_to_pertablepath(path):
         pertable_path(List): List of the folding path using the pertable annotation
 
     """
-
+    print("Input:", path)
     pertable_path = [[] for x in path]
 
     for x in range(len(path)):
@@ -16,7 +16,7 @@ def path_to_pertablepath(path):
         for z in range(len(path[x])):
             if path[x] == ".":
                 pertable_path[x][z] = 0
-            o = 0
+            o = 1
             i = 0
             match = False
             if path[x][z] == "(":
@@ -28,9 +28,9 @@ def path_to_pertablepath(path):
                         o -= 1
 
                     if path[x][z+i] == ")" and o == 0:
-                  
+                        
                         pertable_path[x][z+1] = z + i + 1
-                        pertable_path[x][z+i+1] = z  + 1
+                        pertable_path[x][z+i+1] = z + 1
                         match = True
                     
     return pertable_path
@@ -54,7 +54,6 @@ def pertable_to_path(pertable):
 
 def pertable_to_struct(pertable):
     struct = []
-    #print(pertable)
     for i in range(1,pertable[0]+1):
         if pertable[i] > i:
             struct.append("(")
@@ -69,11 +68,15 @@ def pertable_to_struct(pertable):
     
     return struct
 
+def convert_pts_out_to_nussi_in(string):
+    new_string = string.replace(" ","")
+    return new_string
+
 
 
 if __name__=="__main__":
     print("convert_functions")
-
+    print(path_to_pertablepath(['.', '()', '.()', '(())']))
 
 
 

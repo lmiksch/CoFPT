@@ -2,6 +2,7 @@
 Nussinov-Jacobson python algorithm implementation
 	Predicts the secondary RNA structure from an RNA sequence.
 	The minimal loop length is set to a default of 0
+	Argument: String: takes a string with * notation as input 
 """
 
 from ast import expr_context
@@ -90,7 +91,6 @@ def nussinov(rna):
 	rna = convert(rna)
 	nm = init_matrix(rna)
 	nm = fill(nm, rna)
-	#print(nm)
 	structures = []
 	for x in range(0,len(rna)+1):
 		fold = []
@@ -172,20 +172,5 @@ def module_folding_path(structures,seq):
 
 
 
-"""
-print("asdasdakjsdlkj:",convert_nussi_output("(((.(.).)))","abclblblcba"))    
-
-rna = "AaAaAaAaaaaaAAAA"
-
-string = "abclb*lblc*b*a*"
-
-test = "bla*b*c*ldcbaele*a*b*c*d*"
 
 
-
-for struct in nussinov(string):
-	print(struct)
-	print(convert(string))
-
-module_folding_path(nussinov(string),convert(string))
-"""
