@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
 """
-Takes a folding path in form a list of pertables as input and puts out a block level sequence which has the same folding path as the input
+Takes a folding path in form a list of pairtables as input and puts out a domain level sequence which has the same folding path as the input
 Folding path should be at any times satured and  free from pseudo-knots
+
+Example: 
+input: [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
+output: [[.],[()],[().],[()()]]
+
+
 """
 import  string
-import re
 class module():
     def __init__(self,name,praefix,suffix,star):
         self.name = name
@@ -15,7 +21,6 @@ class module():
     def __str__(self):
             return f"{self.praefix}{self.name}{self.suffix}"
 
- 
 def pertable_to_path(pertable):
     path = []
     for x in range(len(pertable)):
@@ -35,6 +40,15 @@ def pertable_to_path(pertable):
     
 
 def fold_to_seq(path):
+    """ Main function of fold_to_seq.
+
+    Agrs:
+        path (list): A list of the desired folding path using the pairtable annotation 
+
+    Return:
+        new_string (str): A string of domains which should follow the given folding path. 
+
+    """
     domains = list(string.ascii_lowercase)
     for x in range(len(string.ascii_lowercase)):
         for  z in range(len(string.ascii_lowercase)):
@@ -64,7 +78,7 @@ def fold_to_seq(path):
                         z = True
                 except:
                     pass
-                if path[x][y] > path[x-1][y] and path[x-1][y] > 0 and z == False:
+                if path[x][y] > path[x-1][y] and path[x-1][y] > 0 and z == False and allready_paired(x,y,path[x][y],path) == False:
                     globals()["block%s" % y].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % y].praefix
                     domain_pointer += 1
                     globals()["block%s" % y].suffix = globals()["block%s" % y].suffix+ " " + domains[domain_pointer]
@@ -73,6 +87,7 @@ def fold_to_seq(path):
                     globals()["block%s" % path[x][y]].suffix =  globals()["block%s"  % y].praefix[::-1]
                     globals()["block%s" % path[x][y]].praefix = globals()["block%s"  % y].suffix[::-1]
                     domain_pointer += 1
+                   
                 if path[x][y+1] == 0:
                     t = y -1
                     globals()["block%s" % t].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % t].praefix
@@ -80,10 +95,10 @@ def fold_to_seq(path):
                     globals()["block%s" % t].suffix = globals()["block%s" % t].suffix+ " " + domains[domain_pointer]
 
 
-                    globals()["block%s" % y].suffix = globals()["block%s" % t].praefix[::-1]
-                    globals()["block%s" % y].praefix = globals()["block%s" % t].suffix[::-1]
+                    globals()["block%s" % path[x][t]].suffix = globals()["block%s" % t].praefix[::-1]
+                    globals()["block%s" % path[x][t]].praefix = globals()["block%s" % t].suffix[::-1]
                     domain_pointer += 1
-
+                
     #part which adds * notation for complementary
 
     for x in range(1,len(seq)+1):
@@ -115,12 +130,27 @@ def stars(string):
     new_string = ' '.join(string)
     return new_string
 
+def allready_paired(step,x,y,path):
+    for i in range(1,step):
+        try:
+            if path[i][x] == y:
+                print("paired")
+                return True
+        except:
+            pass         
+    return False
 
-path2 = [[1,0],[2,2,1],[3,1,2,0],[4,4,3,2,1]]
-path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
 
-print(fold_to_seq(path2))
+
+if __name__=="__main__":
+    print("Imported path_to_seq")
+
+
+    path2 = [[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 2, 1, 4, 3], [5, 0, 3, 2, 5, 4]]
+    path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
+
+    
+    print(fold_to_seq(path2))
         
-
-
+   
 #print(fold_to_seq(path2))
