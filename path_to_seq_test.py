@@ -1,5 +1,5 @@
 from path_to_seq import *
-from nussi2 import *
+from nussinov import *
 from path_generator import * 
 from convert_functions import *
 import argparse
@@ -20,16 +20,16 @@ parser.add_argument("-t", metavar = "Number of Random Paths", default= 10, help=
 
 args = parser.parse_args()
 
-len = args.length / 2
+length = args.length / 2
 
-len = int(len)
+length = int(length)
 
 
 if args.length%2 == 0:
-    seq = "aA" * len
+    seq = "aA" * length
 
 else:
-    seq = "aA" * len + "a"
+    seq = "aA" * length + "a"
 
 def check_paths(seq):
     succesfull = 0
@@ -48,18 +48,21 @@ def check_paths(seq):
         conv_seq = convert_pts_out_to_nussi_in(calc_seq)
     
         calculated_sequences.append(conv_seq)
-        nussinov_path = nussinov(conv_seq)
-        calculated_path = module_folding_path(nussinov_path,convert(conv_seq))
-        if calculated_path == path:
+        nussinov_path = nussinov_modules(conv_seq)
+        if len(nussinov_path) != 1: 
+            print("Warning: There are more than one optimal folding paths for this sequence. Reconsider your input")
+        if nussinov_path[0] == path and len(nussinov_path) == 1:
             print("works:",pertable_path)
-            print(calculated_path,"calculated from nussinov")
+            print(nussinov_path,"calculated from nussinov")
             print("calculated sequence:",calc_seq) 
             succesfull += 1
 
         else:
             print("Error: Following Path does not match calulated path")
             print(path,"Input",pertable_path)
-            print(calculated_path,"calculated from nussinov")
+            print("Following Paths were calculated from the Nussinov Algorithm")
+            for path in nussinov_path:
+                print(path)
             print("calculated sequence:",calc_seq)
         print("\n")
     print("Number of Succesfull attempts = ", succesfull,"/",args.t)
