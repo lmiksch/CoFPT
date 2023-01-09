@@ -47,18 +47,17 @@ def d_length(domain):
     return 3 
 
 def identical_domains(domain,UL_seq,model):
-     print("Domain",domain,"Seq:",UL_seq)
      for x in range(len(UL_seq)):
         if UL_seq[x] == domain:
             i_pointer = 0
             j_pointer = i_pointer
 
             for u in UL_seq[:x]:
-                print("u = ",u)
+                
                 i_pointer += d_length(u)
             j_pointer = i_pointer    
             for q in UL_seq[x+1:]:
-                print("q = ",q,d_length(q))
+                
                 j_pointer += d_length(q)
                 if q == domain and j_pointer != i_pointer:
                    break
@@ -67,7 +66,7 @@ def identical_domains(domain,UL_seq,model):
             for z in range(d_length(domain)):
                 if i_pointer != j_pointer:
                     model.add_constraints(IdenticalDomains(i_pointer,j_pointer))
-                    print(i_pointer,j_pointer)
+                    #print(i_pointer,j_pointer)
                 i_pointer += 1
                 j_pointer += 1
 
@@ -85,7 +84,7 @@ def find_domain_length(domain):
     global domain_length
     
     length = domain_length[domain]
-    print("length = ", length)
+    
     return length
 
 
@@ -95,7 +94,8 @@ def rna_design(seq,path):
     Takes the calculated sequence(With space annotation) and the calulated nussinovpath as input and designs a RNA sequence
     
     """
-
+    print("Given sequence: ",seq)
+    print("Given path: ",path)
     split_seq = seq.split()
   
     seqlen = 0
@@ -103,44 +103,44 @@ def rna_design(seq,path):
 
     UL_seq = convert_to_UL(no_space_seq)
 
-    print(no_space_seq)
+   
 
     #calculates Sequence length
     for x in range(len(split_seq)):
         seqlen += d_length(split_seq[x])
-        print("seqlen   ",seqlen,d_length(split_seq[x]),split_seq[x])
+        #print("seqlen   ",seqlen,d_length(split_seq[x]),split_seq[x])
 
-    print("seqlen   ",seqlen)
+    #print("seqlen   ",seqlen)
 
 
     model = ir.Model(seqlen,4)
     bps = rna.parse(path)
-    print(bps)
+   
     cons = [rna.BPComp(i,j) for (i,j) in bps]
 
     model.add_constraints(cons)
     #applies constraint, that same domains should have the same sequence
     unique_domains = "".join(set(UL_seq))
     for domain in  unique_domains:
-        print("Domain",domain)
+        #print("Domain",domain)
         identical_domains(domain,UL_seq,model)
 
-    print(path)
+  
   
 
    
     sampler = ir.Sampler(model)
 
-    show_td_info(sampler)
+    #show_td_info(sampler)
 
 
     samples = [sampler.sample().values() for i in range(10)]
 
-    print("samples",samples)
+
 
 
     sequences = [rna.values_to_seq(s) for s in samples]
-    print(sequences)
+    
     
     #Visualization
     split_sequences = [ [] for x in sequences]
@@ -153,7 +153,13 @@ def rna_design(seq,path):
             split_sequences[s_pointer].append(x[l_pointer:r_pointer])
             l_pointer = r_pointer
         s_pointer += 1
-    print(split_sequences)
+    print("\b")
+    print("Resulting Sequences split up based on domains:")    
+
+    for x in split_sequences:
+        print(x)
+    print("")
+    print("Resulting Sequences with calculated structure using RNAfold")    
     for z in sequences:
         fc = RNA.fold_compound(z)
         (mfe_struct, mfe) = fc.mfe()
