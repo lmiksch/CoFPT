@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+This module contains all the different convert functions which can be used to convert outputs into different annotations. 
+
+"""
+
+
 def path_to_pertablepath(path):
     """ Function which turns a structurral path in dot bracket annotation into a pertable path
 
@@ -72,6 +79,18 @@ def convert_pts_out_to_nussi_in(string):
     new_string = string.replace(" ","")
     return new_string
 
+def convert_to_UL(string):
+	counts = string.count("*")
+	c_string = list(string)
+	
+	for x in range(1,len(c_string)):
+		if string[x] == "*":
+			c_string[x-1] = c_string[x-1].upper()
+	for x in range(counts):		
+		c_string.remove("*")
+
+	c_string = "".join(c_string)
+	return c_string
 
 
 if __name__=="__main__":
