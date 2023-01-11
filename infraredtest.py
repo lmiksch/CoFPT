@@ -7,6 +7,8 @@ from nussinov import *
 
 
 
+
+
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
 		return True
@@ -90,10 +92,11 @@ def one_domains(UL_seq):
     return split_seq
 
 def domain_path_to_nt_path(path,UL_seq):
-    
-    ext_path = [[] for x in path]
 
+    ext_path = [[] for x in path]
+    
     for x in range(len(path)):
+        
         
         for z in range(len(path[x][0])):
        
@@ -213,8 +216,9 @@ def rna_design(seq,path):
     print("\b")
     print("Resulting Sequences split up based on domains:")    
 
-    for x in split_sequences:
-        print(x)
+    for x in range(len(split_sequences)):
+        #print(split_seq)
+        print(split_sequences[x])
     print("")
     print("Resulting Sequences with calculated structure using RNAfold")    
     for z in sequences:
@@ -222,9 +226,16 @@ def rna_design(seq,path):
         (mfe_struct, mfe) = fc.mfe()
         print(z)
         print(mfe_struct)
+    
+
+
 
 
 if __name__ == "__main__":
 
-    rna_design("a  b  c  l  c* b* a*  l   b   l   b* ",  [[''], ['.'], ['..'], ['...'], ['....'], ['..(.)'], ['.((.))'], ['(((.)))'], ['(((.))).'], ['(((.)))..'], ['(((.)))...'], ['(((.))).(.)']])   
+    #example for path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
+    #rna_design("a  b  c  l  c* b* a*  l   b   l   b* ",  [[''], ['.'], ['..'], ['...'], ['....'], ['..(.)'], ['.((.))'], ['(((.)))'], ['(((.))).'], ['(((.)))..'], ['(((.)))...'], ['(((.))).(.)']])   
     
+
+    #example for path2 = [[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 2, 1, 4, 3], [5, 0, 3, 2, 5, 4]]
+    rna_design("b l a* b* c* l d c b a e l f* e* a* b* c* d* g* l g d c b a e f",[[''], ['.'], ['..'], ['...'], ['(..)'], ['(..).'], ['(..)..'], ['(..)...'], ['(..)(..)'], ['...((..))'], ['..(((..)))'], ['..(((..))).'], ['..(((..)))..'], ['..(((..)))...'], ['..(((..)))(..)'], ['...((..))((..))'], ['(..((..))((..)))'], ['(..((..))((..))).'], ['(..)..(((((..)))))'], ['(..)..(((((..))))).'], ['(..)..(((((..)))))..'], ['(..)..(((((..)))))(.)'], ['(..)..(((((..)))))(.).'], ['(..)..(((((..)))))(.).'], ['...((..((((..))))((.))))'], ['..(((..((((..))))((.)))))', '..(((..)))(..)(((((.)))))'], ['..(((..((((..))))((.))))).', '..(((..)))(..)(((((.))))).'], ['..(((..)))..(((((((.)))))))']])
