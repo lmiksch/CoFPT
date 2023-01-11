@@ -2,6 +2,7 @@ import infrared as ir
 from infrared import rna
 import RNA 
 from convert_functions import *
+from nussinov import *
 
 
 
@@ -10,8 +11,6 @@ def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
 		return True
 
-
-#def same_domains(seq):
 
 def show_td_info(sampler,width=600):
     td = sampler.td
@@ -46,8 +45,14 @@ def d_length(domain):
         return 3 
     return 3 
 
-def identical_domains(domain,UL_seq,model):
-     for x in range(len(UL_seq)):
+def identical_domains_constraint(domain,UL_seq,model):
+    
+    ir.def_constraint_class(
+    "IdenticalDomains",
+    lambda i,j: [i,j],
+    lambda x,y: x == y )
+
+    for x in range(len(UL_seq)):
         if UL_seq[x] == domain:
             i_pointer = 0
             j_pointer = i_pointer
@@ -55,18 +60,27 @@ def identical_domains(domain,UL_seq,model):
             for u in UL_seq[:x]:
                 
                 i_pointer += d_length(u)
+
             j_pointer = i_pointer    
-            for q in UL_seq[x+1:]:
+            for q in range(len(UL_seq[:x]),len(UL_seq)):
+           
+                if domain not in UL_seq[x+1:]:
+                    return    
+                if UL_seq[q] == domain and j_pointer != i_pointer:
+                   
+                    break
+                j_pointer += d_length(UL_seq[q])
+
                 
-                j_pointer += d_length(q)
-                if q == domain and j_pointer != i_pointer:
-                   break
-                if q == UL_seq[-1] and q != domain:
-                    return
+                
+                
+            if i_pointer > j_pointer:
+                return
             for z in range(d_length(domain)):
                 if i_pointer != j_pointer:
+                    
                     model.add_constraints(IdenticalDomains(i_pointer,j_pointer))
-                    #print(i_pointer,j_pointer)
+                    
                 i_pointer += 1
                 j_pointer += 1
 
@@ -74,7 +88,41 @@ def identical_domains(domain,UL_seq,model):
 def one_domains(UL_seq):
     split_seq = "".join(set(UL_seq))
     return split_seq
+
+def domain_path_to_nt_path(path,UL_seq):
     
+    ext_path = [[] for x in path]
+
+    for x in range(len(path)):
+        
+        for z in range(len(path[x][0])):
+       
+            ext_path[x].append(path[x][0][z] * d_length(UL_seq[z]))
+        ext_path[x] = "".join(ext_path[x])
+
+
+    return ext_path
+
+
+
+
+
+
+def add_folding_path_constraint(path,UL_seq,model):
+    """
+    Takes the path calculated from nussinov for the sequences and adds those pair constraints to the model
+    
+    """
+    ext_path = domain_path_to_nt_path(path,UL_seq)
+
+    for x in ext_path: 
+        cons = []
+        bps = rna.parse(x)
+        cons = [rna.BPComp(i,j) for (i,j) in bps]
+        
+
+        model.add_constraints(cons)
+
 
 
 
@@ -114,16 +162,25 @@ def rna_design(seq,path):
 
 
     model = ir.Model(seqlen,4)
-    bps = rna.parse(path)
+
+    """bps = rna.parse(path)
    
     cons = [rna.BPComp(i,j) for (i,j) in bps]
 
-    model.add_constraints(cons)
+    model.add_constraints(cons)"""
+
+    add_folding_path_constraint(path,UL_seq,model)
+
+    ir.def_constraint_class(
+        "IdenticalDomains",
+        lambda i,j: [i,j],
+        lambda x,y: x == y 
+    )
     #applies constraint, that same domains should have the same sequence
     unique_domains = "".join(set(UL_seq))
     for domain in  unique_domains:
         #print("Domain",domain)
-        identical_domains(domain,UL_seq,model)
+        identical_domains_constraint(domain,UL_seq,model)
 
   
   
@@ -131,7 +188,7 @@ def rna_design(seq,path):
    
     sampler = ir.Sampler(model)
 
-    #show_td_info(sampler)
+    show_td_info(sampler)
 
 
     samples = [sampler.sample().values() for i in range(10)]
@@ -169,5 +226,5 @@ def rna_design(seq,path):
 
 if __name__ == "__main__":
 
-    rna_design("a b c l a* b* c* l b","(((((((((((...)))))))))))........")   
-
+    rna_design("a  b  c  l  c* b* a*  l   b   l   b* ",  [[''], ['.'], ['..'], ['...'], ['....'], ['..(.)'], ['.((.))'], ['(((.)))'], ['(((.))).'], ['(((.)))..'], ['(((.)))...'], ['(((.))).(.)']])   
+    
