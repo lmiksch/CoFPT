@@ -297,6 +297,7 @@ def module_folding_path(structures,seq):
 		Returns: 
 			module_structure(list): 
 	"""
+	print(structures,seq)
 	modules = seq.split("l")
 	seq = convert(seq)
 	module_path = []
@@ -328,18 +329,20 @@ def module_folding_path(structures,seq):
 		
 
 def remove_non_modules(structures,seq):
+	
 	complete_module_path = []
 	module_indices = []
 	seq = convert(seq)
 	
 	for x in range(len(seq)):
 		if seq[x] == "l":
-			module_indices.append(x)
+			module_indices.append(x+1)
 
 	for x in module_indices:
 		complete_module_path.append(structures[x])
 
 	complete_module_path.append(structures[-1])
+	
 	return complete_module_path
 
 def get_domain_folds(structures,rna):
@@ -365,6 +368,7 @@ def nussinov_modules(rna):
 	print("input:",rna)
 
 	nussi_output = nussinov(rna)
+	print(nussi_output)
 	modules  = remove_non_modules(nussi_output,rna)
 	domain_folds = get_domain_folds(modules,rna)
 	possible_paths = find_possible_structs(domain_folds)
@@ -377,6 +381,6 @@ def nussinov_modules(rna):
 
 if __name__ == "__main__":
 
-	print(nussinov_modules("bla*b*c*lcbalb*"))
+	print(nussinov_modules("abclc*b*a*lb"))
 
 

@@ -3,6 +3,8 @@ from infrared import rna
 import RNA 
 from convert_functions import *
 from nussinov import *
+import random
+import math
 
 
 
@@ -154,7 +156,7 @@ def rna_design(seq,path):
 
     UL_seq = convert_to_UL(no_space_seq)
 
-   
+    
 
     #calculates Sequence length
     for x in range(len(split_seq)):
@@ -163,14 +165,9 @@ def rna_design(seq,path):
 
     #print("seqlen   ",seqlen)
 
-
+    print("Running Calculations")
     model = ir.Model(seqlen,4)
 
-    """bps = rna.parse(path)
-   
-    cons = [rna.BPComp(i,j) for (i,j) in bps]
-
-    model.add_constraints(cons)"""
 
     add_folding_path_constraint(path,UL_seq,model)
 
@@ -185,57 +182,138 @@ def rna_design(seq,path):
         #print("Domain",domain)
         identical_domains_constraint(domain,UL_seq,model)
 
-  
-  
-
-   
-    sampler = ir.Sampler(model)
-
-    show_td_info(sampler)
-
-
-    samples = [sampler.sample().values() for i in range(10)]
 
 
 
-
-    sequences = [rna.values_to_seq(s) for s in samples]
     
+    #optimization
+
+    extended_fp = domain_path_to_nt_path(path,UL_seq)
+
+ 
+
+    def mc_optimize(model, objective, steps, temp, start=None):
+        sampler = ir.Sampler(model)
+        cur = sampler.sample() if start is None else start
+        curval = objective(cur)
+        best, bestval = cur, curval
+        
+        ccs = model.connected_components()
+        weights = [1/len(cc) for cc in ccs]
+        
+        for i in range(steps):
+            cc = random.choices(ccs,weights)[0]
+            new = sampler.resample(cc, cur)
+            newval = objective(new)
+            if (newval >= curval
+                or random.random() <= math.exp((newval-curval)/temp)):
+                cur, curval = new, newval
+                if curval > bestval:
+                    best, bestval = cur, curval
     
-    #Visualization
-    split_sequences = [ [] for x in sequences]
-    s_pointer = 0
-    for x in sequences:
+        return (best, bestval)
+    
+    def constrained_efe(sequence,c):
+        fc = RNA.fold_compound(sequence)
+        fc.hc_add_from_db(c)
+        return fc.pf()[1]
+ 
+    def rstd_objective(sequence):
+    
+        split_nt_sequence = []
+        
+        
         l_pointer = 0
         for z in split_seq:
             r_pointer = l_pointer + d_length(z)
             
-            split_sequences[s_pointer].append(x[l_pointer:r_pointer])
+            split_nt_sequence.append(sequence[l_pointer:r_pointer])
             l_pointer = r_pointer
-        s_pointer += 1
-    print("\b")
-    print("Resulting Sequences split up based on domains:")    
+        
+        
+        nt_path = []
 
-    for x in range(len(split_sequences)):
-        #print(split_seq)
-        print(split_sequences[x])
+        for  x in range(len(UL_seq)):
+            if UL_seq[x] == "l":
+                
+                nt_path.append("".join(split_nt_sequence[:x+1]))
+        nt_path.append(sequence)
+        
+        total = 0
+        extended_module_fp = remove_non_modules(extended_fp,seq.replace(" ",""))
+        
+
+        for x in range(len(extended_module_fp)):
+           
+            efe = constrained_efe(nt_path[x],extended_module_fp[x])
+            fc = RNA.fold_compound(nt_path[x])
+            
+            fe = fc.eval_structure(extended_module_fp[x])
+            total += fe - efe
+        
+        
+        return total
+
+
+    #[rstd-optimize-call]
+    objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
+
+    best, best_val = mc_optimize(model, objective,steps = 500, temp = 0.03)
+
+    print("done")
+    print(" ")
+    print("Calculated NT sequence:")
+    print(rna.ass_to_seq(best), -best_val)
+    
+    ntseq_fp = split_ntseq_to_domainfp(rna.ass_to_seq(best),seq)
+
+
+    #Visualization
+   
+
+    print("\b")   
+    
     print("")
-    print("Resulting Sequences with calculated structure using RNAfold")    
-    for z in sequences:
+    print("Resulting Module Folding Path with calculated structure using RNAfold")    
+    for z in ntseq_fp:
         fc = RNA.fold_compound(z)
         (mfe_struct, mfe) = fc.mfe()
         print(z)
         print(mfe_struct)
-    
+    #output include all folding path structures so (),().,()(), with rnafold
 
 
+def split_ntseq_to_domainfp(nt_seq,domain_seq):
 
+        split_seq = domain_seq.split()
+        
+        split_nt_sequence = []
+        UL_seq = convert_to_UL(domain_seq)
+        
+        l_pointer = 0
+        for z in split_seq:
+            r_pointer = l_pointer + d_length(z)
+            
+            split_nt_sequence.append(nt_seq[l_pointer:r_pointer])
+            l_pointer = r_pointer
+        
+        print("Sequences Split up based on domains",split_nt_sequence)
+        
+        nt_path = []
+
+        for  x in range(len(UL_seq)):
+            if UL_seq[x] == "l":
+                
+                nt_path.append("".join(split_nt_sequence[:x+1]))
+        nt_path.append(nt_seq)
+
+        return nt_path
 
 if __name__ == "__main__":
 
     #example for path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
-    #rna_design("a  b  c  l  c* b* a*  l   b   l   b* ",  [[''], ['.'], ['..'], ['...'], ['....'], ['..(.)'], ['.((.))'], ['(((.)))'], ['(((.))).'], ['(((.)))..'], ['(((.)))...'], ['(((.))).(.)']])   
+    rna_design("a  b  c  l  c* b* a*  l   b   l   b* ",  [[''], ['.'], ['..'], ['...'], ['....'], ['..(.)'], ['.((.))'], ['(((.)))'], ['(((.))).'], ['(((.)))..'], ['(((.)))...'], ['(((.))).(.)']])   
     
 
     #example for path2 = [[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 2, 1, 4, 3], [5, 0, 3, 2, 5, 4]]
-    rna_design("b l a* b* c* l d c b a e l f* e* a* b* c* d* g* l g d c b a e f",[[''], ['.'], ['..'], ['...'], ['(..)'], ['(..).'], ['(..)..'], ['(..)...'], ['(..)(..)'], ['...((..))'], ['..(((..)))'], ['..(((..))).'], ['..(((..)))..'], ['..(((..)))...'], ['..(((..)))(..)'], ['...((..))((..))'], ['(..((..))((..)))'], ['(..((..))((..))).'], ['(..)..(((((..)))))'], ['(..)..(((((..))))).'], ['(..)..(((((..)))))..'], ['(..)..(((((..)))))(.)'], ['(..)..(((((..)))))(.).'], ['(..)..(((((..)))))(.).'], ['...((..((((..))))((.))))'], ['..(((..((((..))))((.)))))', '..(((..)))(..)(((((.)))))'], ['..(((..((((..))))((.))))).', '..(((..)))(..)(((((.))))).'], ['..(((..)))..(((((((.)))))))']])
+    #rna_design("b l a* b* c* l d c b a e l f* e* a* b* c* d* g* l g d c b a e f",[[''], ['.'], ['..'], ['...'], ['(..)'], ['(..).'], ['(..)..'], ['(..)...'], ['(..)(..)'], ['...((..))'], ['..(((..)))'], ['..(((..))).'], ['..(((..)))..'], ['..(((..)))...'], ['..(((..)))(..)'], ['...((..))((..))'], ['(..((..))((..)))'], ['(..((..))((..))).'], ['(..)..(((((..)))))'], ['(..)..(((((..))))).'], ['(..)..(((((..)))))..'], ['(..)..(((((..)))))(.)'], ['(..)..(((((..)))))(.).'], ['(..)..(((((..)))))(.).'], ['...((..((((..))))((.))))'], ['..(((..((((..))))((.)))))', '..(((..)))(..)(((((.)))))'], ['..(((..((((..))))((.))))).', '..(((..)))(..)(((((.))))).'], ['..(((..)))..(((((((.)))))))']])
