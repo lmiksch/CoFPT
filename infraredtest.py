@@ -46,7 +46,7 @@ def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
         return 5
     elif domain == "l":
-        return 3 
+        return 3
     return 3 
 
 def identical_domains_constraint(domain,UL_seq,model):
@@ -234,21 +234,22 @@ def rna_design(seq,path):
         nt_path = []
 
         for  x in range(len(UL_seq)):
-            if UL_seq[x] == "l":
+            
                 
-                nt_path.append("".join(split_nt_sequence[:x+1]))
+            nt_path.append("".join(split_nt_sequence[:x]))
         nt_path.append(sequence)
         
         total = 0
-        extended_module_fp = remove_non_modules(extended_fp,seq.replace(" ",""))
         
 
-        for x in range(len(extended_module_fp)):
-           
-            efe = constrained_efe(nt_path[x],extended_module_fp[x])
+        for x in range(1,len(extended_fp)):
+            #print(nt_path[x])
+            #print(extended_fp[x])
+            efe = constrained_efe(nt_path[x],extended_fp[x])
             fc = RNA.fold_compound(nt_path[x])
             
-            fe = fc.eval_structure(extended_module_fp[x])
+            fe = fc.eval_structure(extended_fp[x])
+            
             total += fe - efe
         
         
@@ -258,12 +259,13 @@ def rna_design(seq,path):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 500, temp = 0.03)
+    best, best_val = mc_optimize(model, objective,steps = 500, temp = 0.04)
 
     print("done")
     print(" ")
     print("Calculated NT sequence:")
     print(rna.ass_to_seq(best), -best_val)
+    print("length = ",len(rna.ass_to_seq(best)))
     
     ntseq_fp = split_ntseq_to_domainfp(rna.ass_to_seq(best),seq)
 
