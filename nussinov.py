@@ -118,8 +118,22 @@ def nussinov(rna):
 		
 	nm, dir_matrix = fill(nm, rna,dir_matrix)
 
+
 	structures = [[] for x in range(M+1)]
-	for x in range(1,len(rna)+1):
+
+	#change it so that it only evals module folding path
+
+	module_indices = []
+		
+	for x in range(len(rna)):
+		if rna[x] == "l":
+			module_indices.append(x+1)
+	module_indices.append(len(rna))
+
+	
+	structures = []	
+	
+	for x in module_indices:
 		
 		fold = []
 		
@@ -144,41 +158,34 @@ def nussinov(rna):
 		traceback(new_dir_matrix, rna, fold, 0, x -1,folds,newm)
 		
 		final_folds = folds
-		#print(folds)
+		#print(" ")
+		#print("folds",folds)
 		result = []
 		for sublist in final_folds:
 			if len(set([i for j in sublist for i in j])) == len([i for j in sublist for i in j]):
 				result.append(sublist)
-		#print(number_pairs)
+		
+		#print("number pairs",number_pairs)
+		#print("result",result)
 		result = [x for x in result if len(x) == number_pairs]
 		#print("RESULT",result)
+		cur_struct = []
 		for fold in result:
 			
 			res = dot_write(rna, fold,x)
 			
-			structures[x].append(res)
-	#print(structures)
-	for k in range(len(structures)):
-		structures[k] = list(dict.fromkeys(structures[k]))
-	for i in range(len(structures)):
-		remove_index = []	
-		if len(structures[i]) > 1: 
-			for z in range(len(structures[i])):
-				
-				if structures[i][z] == "." * len(structures[i][z]):
-					
-					remove_index.append(z)
+			cur_struct.append(res)
+		
+	
+		cur_struct = list(dict.fromkeys(cur_struct))
+		structures.append(cur_struct)
 
-			for x in remove_index:
-				del structures[i][-1]
 
-	structures[0] = [""]
-	structures[1] = ["."]
+	#structures.insert(0,[""])
+	#structures[1] = ["."]
 	
 
 	#structures = remove_non_modules(structures,input)
-
-
 
 
 
@@ -368,9 +375,10 @@ def nussinov_modules(rna):
 	print("input:",rna)
 
 	nussi_output = nussinov(rna)
-	print(nussi_output)
-	modules  = remove_non_modules(nussi_output,rna)
-	domain_folds = get_domain_folds(modules,rna)
+	
+	
+	domain_folds = get_domain_folds(nussi_output,rna)
+	print("domain folds:",domain_folds)
 	possible_paths = find_possible_structs(domain_folds)
 
 	return possible_paths
@@ -380,7 +388,9 @@ def nussinov_modules(rna):
 
 
 if __name__ == "__main__":
-
-	print(nussinov_modules("abclc*b*a*lb"))
+	# does not put out final structures for last folds:  bla*b*c*lgdcdcbaeaeflf*e*a*b*c*d*g*lb 
+	# input: ['.', '()', '.()', '()()', '()().']
+	print("nussi output:",nussinov_modules("bla*b*c*lgdcbaeflf*e*a*b*c*d*g*lb"))
+	
 
 

@@ -34,27 +34,29 @@ class domain():
         self.star = star
         self.length = length
 
+def identicaldomains(x):
+    if x == True:
 
-ir.def_constraint_class(
-    "IdenticalDomains",
-    lambda i,j: [i,j],
-    lambda x,y: x == y 
-)
+        ir.def_constraint_class(
+            "IdenticalDomains",
+            lambda i,j: [i,j],
+            lambda x,y: x == y 
+        )
+    print("Imported IdenticalDomains constraint")
+
+identicaldomains
+
 
 #could be changed to have custom input for the different domains
 def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
         return 5
     elif domain == "l":
-        return 3
+        return 5
     return 3 
 
 def identical_domains_constraint(domain,UL_seq,model):
     
-    ir.def_constraint_class(
-    "IdenticalDomains",
-    lambda i,j: [i,j],
-    lambda x,y: x == y )
 
     for x in range(len(UL_seq)):
         if UL_seq[x] == domain:
@@ -156,6 +158,7 @@ def rna_design(seq,path):
 
     UL_seq = convert_to_UL(no_space_seq)
 
+    identicaldomains(True)
     
 
     #calculates Sequence length
@@ -171,11 +174,7 @@ def rna_design(seq,path):
 
     add_folding_path_constraint(path,UL_seq,model)
 
-    ir.def_constraint_class(
-        "IdenticalDomains",
-        lambda i,j: [i,j],
-        lambda x,y: x == y 
-    )
+
     #applies constraint, that same domains should have the same sequence
     unique_domains = "".join(set(UL_seq))
     for domain in  unique_domains:
@@ -191,7 +190,7 @@ def rna_design(seq,path):
     extended_fp = domain_path_to_nt_path(path,UL_seq)
 
  
-
+    print("extended fp",extended_fp)
     def mc_optimize(model, objective, steps, temp, start=None):
         sampler = ir.Sampler(model)
         cur = sampler.sample() if start is None else start
@@ -234,9 +233,10 @@ def rna_design(seq,path):
         nt_path = []
 
         for  x in range(len(UL_seq)):
+            if UL_seq[x] == "l":
             
                 
-            nt_path.append("".join(split_nt_sequence[:x]))
+                nt_path.append("".join(split_nt_sequence[:x+1]))
         nt_path.append(sequence)
         
         total = 0
@@ -312,10 +312,21 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
         return nt_path
 
 if __name__ == "__main__":
-
-    #example for path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
-    rna_design("a  b  c  l  c* b* a*  l   b   l   b* ",  [[''], ['.'], ['..'], ['...'], ['....'], ['..(.)'], ['.((.))'], ['(((.)))'], ['(((.))).'], ['(((.)))..'], ['(((.)))...'], ['(((.))).(.)']])   
     
+    #example1 for path = [['.'],['()'],['.()'],['()()'],['.(())'],['()()()'],['.()(())'],['(()(()))']]
+    seq = "b   l  f* a* b* c* g*  l  d c  b  a e  l  j* e* a* b* c* d* k*  l  h g c  b  a f i  l  i* f* a* b* c* g* h*  l  k d c  b  a e j  l   b*"
+    path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((..)))))..'], ['..(((((.(((((..)))))...)))))..'], ['(...)...(((((..)))))..(((((((.))))))).'], ['...(((...)))..(((((((.(((((((.))))))).))))))).'], ['(..(((...)))..(((((((.(((((((.))))))).))))))).)']]
+    #rna_design(seq,path)
 
-    #example for path2 = [[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 2, 1, 4, 3], [5, 0, 3, 2, 5, 4]]
-    #rna_design("b l a* b* c* l d c b a e l f* e* a* b* c* d* g* l g d c b a e f",[[''], ['.'], ['..'], ['...'], ['(..)'], ['(..).'], ['(..)..'], ['(..)...'], ['(..)(..)'], ['...((..))'], ['..(((..)))'], ['..(((..))).'], ['..(((..)))..'], ['..(((..)))...'], ['..(((..)))(..)'], ['...((..))((..))'], ['(..((..))((..)))'], ['(..((..))((..))).'], ['(..)..(((((..)))))'], ['(..)..(((((..))))).'], ['(..)..(((((..)))))..'], ['(..)..(((((..)))))(.)'], ['(..)..(((((..)))))(.).'], ['(..)..(((((..)))))(.).'], ['...((..((((..))))((.))))'], ['..(((..((((..))))((.)))))', '..(((..)))(..)(((((.)))))'], ['..(((..((((..))))((.))))).', '..(((..)))(..)(((((.))))).'], ['..(((..)))..(((((((.)))))))']])
+    #"CACGCAUCCCACCCGCGUGACUUCAAUCCAUAGUCACGCGGGCCCAUCGAAGGGCCCGCGUGACUAUGCCUAUCUCGUGAAGUCACGCGGGUGGUCCAUCGGGCCACCCGCGUGACUUCACGAAUCGGGCAUAGUCACGCGGGCCCUUCAUCGCGUG"
+
+
+    #example [['.', '()', '.()', '(())', '.()()', '(()())']]
+    #seq = "b   l  a* b* c*  l  c  b  a  l  d* b* e*  l  e  b  d  l   b* "
+    #path = [['..'], ['(..)..'], ['..(((.))).'], ['(.(((.)))..)..'], ['..(((.))).(((.))).'], ['(.(((.))).(((.))).)']]
+
+
+    rna_design(seq,path)
+
+
+    

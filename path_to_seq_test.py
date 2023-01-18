@@ -45,9 +45,11 @@ def check_paths(seq):
     for path in paths:
         pertable_path = path_to_pertablepath(path)
         calc_seq = fold_to_seq(pertable_path)
+        print("Calculated Sequence = ",calc_seq)
         conv_seq = convert_pts_out_to_nussi_in(calc_seq)
     
         calculated_sequences.append(conv_seq)
+        print(conv_seq)
         nussinov_path = nussinov_modules(conv_seq)
         if len(nussinov_path) != 1: 
             print("Warning: There are more than one optimal folding paths for this sequence. Reconsider your input")
