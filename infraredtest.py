@@ -8,31 +8,9 @@ import math
 
 
 
-
-
-
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
 		return True
-
-
-def show_td_info(sampler,width=600):
-    td = sampler.td
-    print("tree width =", td.treewidth())
-    print("bags =", td.bags)
-    print("edges =", td.edges)
-    
-    tmpfile="tmp_out.png"
-    sampler.plot_td(tmpfile,'png')
-    from IPython.display import Image
-    return Image(filename=tmpfile,width=width)
-
-
-class domain():
-    def __init__(self,name,star,length):
-        self.name = name
-        self.star = star
-        self.length = length
 
 def identicaldomains(x):
     if x == True:
@@ -56,7 +34,15 @@ def d_length(domain):
     return 3 
 
 def identical_domains_constraint(domain,UL_seq,model):
-    
+    """Identical_domains_constraint
+
+    Applies the constaint to our model, that the value of indices of the same domain must be equal.
+
+    Args:
+        domain: domain name
+        UL_seq: upper lower case domain sequence
+        model: model created in the infrared sampler
+    """    
 
     for x in range(len(UL_seq)):
         if UL_seq[x] == domain:
@@ -68,6 +54,7 @@ def identical_domains_constraint(domain,UL_seq,model):
                 i_pointer += d_length(u)
 
             j_pointer = i_pointer    
+
             for q in range(len(UL_seq[:x]),len(UL_seq)):
            
                 if domain not in UL_seq[x+1:]:
@@ -77,9 +64,7 @@ def identical_domains_constraint(domain,UL_seq,model):
                     break
                 j_pointer += d_length(UL_seq[q])
 
-                
-                
-                
+        
             if i_pointer > j_pointer:
                 return
             for z in range(d_length(domain)):
@@ -96,6 +81,17 @@ def one_domains(UL_seq):
     return split_seq
 
 def domain_path_to_nt_path(path,UL_seq):
+    """ Domain_path_to_nt_path
+
+    Takes the domain level path and extends the number of the base pairings corresponding to their length: ( with length 5 --> (((((
+
+    args:
+        path (list): domain level path 
+        UL_seq (list): upper lower case sequence 
+    
+    Returns:
+        ext_path (list): where each sublist corresponds to the extended domain path
+    """
 
     ext_path = [[] for x in path]
     
@@ -118,8 +114,14 @@ def domain_path_to_nt_path(path,UL_seq):
 def add_folding_path_constraint(path,UL_seq,model):
     """
     Takes the path calculated from nussinov for the sequences and adds those pair constraints to the model
-    
+
+    args: 
+        path (list): output path of the nussinov algorithm
+        UL_seq (list): upper lower case sequence
+        model : model created in infrared sampler
     """
+
+
     ext_path = domain_path_to_nt_path(path,UL_seq)
 
     for x in ext_path: 
@@ -142,56 +144,7 @@ def find_domain_length(domain):
     
     return length
 
-
-
-def rna_design(seq,path):
-    """
-    Takes the calculated sequence(With space annotation) and the calulated nussinovpath as input and designs a RNA sequence
-    
-    """
-    print("Given sequence: ",seq)
-    print("Given path: ",path)
-    split_seq = seq.split()
-  
-    seqlen = 0
-    no_space_seq = "".join(split_seq)
-
-    UL_seq = convert_to_UL(no_space_seq)
-
-    identicaldomains(True)
-    
-
-    #calculates Sequence length
-    for x in range(len(split_seq)):
-        seqlen += d_length(split_seq[x])
-        #print("seqlen   ",seqlen,d_length(split_seq[x]),split_seq[x])
-
-    #print("seqlen   ",seqlen)
-
-    print("Running Calculations")
-    model = ir.Model(seqlen,4)
-
-
-    add_folding_path_constraint(path,UL_seq,model)
-
-
-    #applies constraint, that same domains should have the same sequence
-    unique_domains = "".join(set(UL_seq))
-    for domain in  unique_domains:
-        #print("Domain",domain)
-        identical_domains_constraint(domain,UL_seq,model)
-
-
-
-
-    
-    #optimization
-
-    extended_fp = domain_path_to_nt_path(path,UL_seq)
-
- 
-    print("extended fp",extended_fp)
-    def mc_optimize(model, objective, steps, temp, start=None):
+def mc_optimize(model, objective, steps, temp, start=None):
         sampler = ir.Sampler(model)
         cur = sampler.sample() if start is None else start
         curval = objective(cur)
@@ -209,19 +162,75 @@ def rna_design(seq,path):
                 cur, curval = new, newval
                 if curval > bestval:
                     best, bestval = cur, curval
-    
+        
         return (best, bestval)
-    
-    def constrained_efe(sequence,c):
+
+def constrained_efe(sequence,c):
+        """Calculates the ensemble free energy of sequence given constraint c
+        
+        """
         fc = RNA.fold_compound(sequence)
-        fc.hc_add_from_db(c)
+        fc.hc_add_from_db(c) # not sure if it's necessary to add constraint
         return fc.pf()[1]
+
+
+
+def rna_design(seq,path):
+    """
+    Takes the calculated sequence(With space annotation) and the calulated nussinovpath as input and designs a RNA sequence
+    
+    args: 
+        seq: sequence generated by path_to_seq (space annotation)
+        path: extended folding path 
+
+
+    """
+    print("Given sequence: ",seq)
+    print("Given path: ",path)
+    split_seq = seq.split()
+  
+    seqlen = 0
+    no_space_seq = "".join(split_seq)
+
+    UL_seq = convert_to_UL(no_space_seq)
+
+    identicaldomains(True)
+    
+
+    #calculates Sequence length
+    for x in range(len(split_seq)):
+        seqlen += d_length(split_seq[x])
+       
+
+    print("Running Calculations")
+    model = ir.Model(seqlen,4)
+
+    
+    add_folding_path_constraint(path,UL_seq,model)
+
+
+    #applies constraint, that same domains should have the same sequence
+    unique_domains = "".join(set(UL_seq))
+    for domain in  unique_domains:
+        identical_domains_constraint(domain,UL_seq,model)
+
+
+
+
+    
+    #optimization
+
+    extended_fp = domain_path_to_nt_path(path,UL_seq)
+
+
+
  
     def rstd_objective(sequence):
     
         split_nt_sequence = []
         
         
+        #creates a list of list where each sublist i corresponds to the sequence at transcription step i 
         l_pointer = 0
         for z in split_seq:
             r_pointer = l_pointer + d_length(z)
@@ -239,15 +248,12 @@ def rna_design(seq,path):
                 nt_path.append("".join(split_nt_sequence[:x+1]))
         nt_path.append(sequence)
         
+
         total = 0
         
-
         for x in range(1,len(extended_fp)):
-            #print(nt_path[x])
-            #print(extended_fp[x])
             efe = constrained_efe(nt_path[x],extended_fp[x])
             fc = RNA.fold_compound(nt_path[x])
-            
             fe = fc.eval_structure(extended_fp[x])
             
             total += fe - efe
@@ -259,29 +265,48 @@ def rna_design(seq,path):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 500, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
 
+
+
+
+    #Output generation
+    f = open("IR_output.txt", "a")
     print("done")
     print(" ")
     print("Calculated NT sequence:")
+    f.write("Calculated NT sequence: \n")
     print(rna.ass_to_seq(best), -best_val)
+    f.write(rna.ass_to_seq(best))
+    f.write("\n")
+    f.write("best score: ")
+    f.write(str(-best_val))
+    f.write(" \n")
     print("length = ",len(rna.ass_to_seq(best)))
-    
+    f.write("Length = ")
+    f.write(str(len(rna.ass_to_seq(best))))
+    f.write(" \n")
     ntseq_fp = split_ntseq_to_domainfp(rna.ass_to_seq(best),seq)
 
 
     #Visualization
    
 
-    print("\b")   
+    print("\n")   
     
-    print("")
-    print("Resulting Module Folding Path with calculated structure using RNAfold")    
+    print(" ")
+    print("Resulting Module Folding Path with calculated structure using RNAfold")   
+    f.write("Resulting Module Folding Path with calculated structure using RNAfold") 
+    f.write(" \n")
     for z in ntseq_fp:
         fc = RNA.fold_compound(z)
         (mfe_struct, mfe) = fc.mfe()
         print(z)
         print(mfe_struct)
+        f.write(z)
+        f.write(" \n")
+        f.write(mfe_struct)
+        f.write(" \n")
     #output include all folding path structures so (),().,()(), with rnafold
 
 
@@ -314,18 +339,25 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
 if __name__ == "__main__":
     
     #example1 for path = [['.'],['()'],['.()'],['()()'],['.(())'],['()()()'],['.()(())'],['(()(()))']]
-    seq = "b   l  f* a* b* c* g*  l  d c  b  a e  l  j* e* a* b* c* d* k*  l  h g c  b  a f i  l  i* f* a* b* c* g* h*  l  k d c  b  a e j  l   b*"
-    path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((..)))))..'], ['..(((((.(((((..)))))...)))))..'], ['(...)...(((((..)))))..(((((((.))))))).'], ['...(((...)))..(((((((.(((((((.))))))).))))))).'], ['(..(((...)))..(((((((.(((((((.))))))).))))))).)']]
+    #seq = "b   l  f* a* b* c* g*  l  d c  b  a e  l  j* e* a* b* c* d* k*  l  h g c  b  a f i  l  i* f* a* b* c* g* h*  l  k d c  b  a e j  l   b*"
+    #path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((..)))))..'], ['..(((((.(((((..)))))...)))))..'], ['(...)...(((((..)))))..(((((((.))))))).'], ['...(((...)))..(((((((.(((((((.))))))).))))))).'], ['(..(((...)))..(((((((.(((((((.))))))).))))))).)']]
     #rna_design(seq,path)
 
-    #"CACGCAUCCCACCCGCGUGACUUCAAUCCAUAGUCACGCGGGCCCAUCGAAGGGCCCGCGUGACUAUGCCUAUCUCGUGAAGUCACGCGGGUGGUCCAUCGGGCCACCCGCGUGACUUCACGAAUCGGGCAUAGUCACGCGGGCCCUUCAUCGCGUG"
-
-
+    
     #example [['.', '()', '.()', '(())', '.()()', '(()())']]
     #seq = "b   l  a* b* c*  l  c  b  a  l  d* b* e*  l  e  b  d  l   b* "
     #path = [['..'], ['(..)..'], ['..(((.))).'], ['(.(((.)))..)..'], ['..(((.))).(((.))).'], ['(.(((.))).(((.))).)']]
+    
 
+    #pres example
+    seq = " b   l  f* a* b* c* g*  l  d c  b  a e  l  e* a* b* c* d*  l  h g c  b  a f i  l  i* f* a* b* c* g* h*"
+    path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((.))))).'], ['..(((((.(((((.)))))..)))))..'], ['(...)...(((((.))))).(((((((.)))))))']]
+    
 
+    #pres example 2 long seq ['.', '()', '.()', '()()', '.()()', '()()()', '.(()())', '((()()))', '((()())).', '((()()))()']
+    #seq = " v  b  u  l  j* d* a* b* c* e* k*  l  t m i f c  b  a g h n s  l  r* o* h* g* a* b* c* f* i* p* q*  l  z w q p i f c  b  a g h o r x y  l  y* x* r* o* h* g* a* b* c* f* i* p* q* w* z*  l  k e c  b  a d j  l  u* b* v*  l   b   l   b* "
+    #path = [['....'], ['.(.....)....'], ['......(((.......))).....'], ['.(.....)......(((((((.....)))))))...'], ['......(((.......))).....(((((((((((...)))))))))))...'], ['.(.....)......(((((((.....)))))))...(((((((((((((((.))))))))))))))).'], ['....(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).'], ['(((.(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).))).'], ['(((.(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).)))...'], ['(((.(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).))).(.)']]
+    
     rna_design(seq,path)
 
 
