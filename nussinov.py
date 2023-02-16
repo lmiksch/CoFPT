@@ -7,6 +7,7 @@ Nussinov-Jacobson python algorithm implementation
 
 import numpy as np
 import itertools
+import pandas as pd
 
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
@@ -111,12 +112,14 @@ def nussinov(rna):
 	rna = convert(rna)
 	nm = init_matrix(rna)
 	M = len(rna)
+	
 	dir_matrix = [[] for x in range(M)]
 	for x in range(M):
 		dir_matrix[x] = [[] for x in range(M)]  
 
 		
 	nm, dir_matrix = fill(nm, rna,dir_matrix)
+
 
 
 	structures = [[] for x in range(M+1)]
@@ -132,9 +135,9 @@ def nussinov(rna):
 
 	
 	structures = []	
-	
+	#print("module indices",module_indices)
 	for x in module_indices:
-		
+		#print("x = ",x,"-------------------")
 		fold = []
 		
 		newm = nm[:x,:x]
@@ -154,12 +157,13 @@ def nussinov(rna):
 		global check_rc
 		check_rc = 0
 		global number_pairs
-		number_pairs = total_pairs(rna[:x])
+		number_pairs = nm[0][x-1]
+
 		traceback(new_dir_matrix, rna, fold, 0, x -1,folds,newm)
 		
 		final_folds = folds
 		#print(" ")
-		#print("folds",folds)
+		#print("folds",final_folds)
 		result = []
 		for sublist in final_folds:
 			if len(set([i for j in sublist for i in j])) == len([i for j in sublist for i in j]):
@@ -169,6 +173,8 @@ def nussinov(rna):
 		#print("result",result)
 		result = [x for x in result if len(x) == number_pairs]
 		#print("RESULT",result)
+		if len(result) == 0:
+			print("-------------------------------------------------------",rna)
 		cur_struct = []
 		for fold in result:
 			
@@ -269,6 +275,10 @@ def flatten(B):    # function needed for code below;
 
 
 def convert(string):
+	"""converts string in star annotation to UL_seq and keeps the spaces
+
+
+	"""
 	counts = string.count("*")
 	c_string = list(string)
 	
@@ -372,13 +382,23 @@ def get_domain_folds(structures,rna):
 
 
 def nussinov_modules(rna):
-	print("input:",rna)
+	""" Takes rna sequence and applies our nussinov algorithm to it. 
+
+	Args: 
+		rna (str): domain level sequence with spaces
+
+	Returns: 
+		possible_paths (list): List of all possible paths were each sublist corresponds to one path. 
+	
+	"""
+	
 
 	nussi_output = nussinov(rna)
+	print(nussi_output)
 	
 	
 	domain_folds = get_domain_folds(nussi_output,rna)
-	print("domain folds:",domain_folds)
+	#print("domain folds:",domain_folds)
 	possible_paths = find_possible_structs(domain_folds)
 
 	return possible_paths
@@ -389,8 +409,8 @@ def nussinov_modules(rna):
 
 if __name__ == "__main__":
 	# does not put out final structures for last folds:  bla*b*c*lgdcdcbaeaeflf*e*a*b*c*d*g*lb 
-	# input: ['.', '()', '.()', '()()', '()().']
-	print("nussi output:",nussinov_modules("bla*b*c*lgdcbaeflf*e*a*b*c*d*g*lb"))
+	# input: ['.', '()', '.()', '(())', '(()).', '()(())', '.((()))']
+	print("nussi output:",nussinov("ebdlh*a*b*c*i*lfcbagld*b*e*lblg*a*b*c*f*licbah"))
 	
 
 

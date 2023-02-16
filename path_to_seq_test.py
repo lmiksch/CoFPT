@@ -43,25 +43,25 @@ def check_paths(seq):
 
     print("Checking if paths are equal")
     for path in paths:
-        pertable_path = path_to_pertablepath(path)
-        calc_seq = fold_to_seq(pertable_path)
+        pairtable_path = path_to_pairtablepath(path)
+        calc_seq = fold_to_seq(pairtable_path)
         print("Calculated Sequence = ",calc_seq)
         conv_seq = convert_pts_out_to_nussi_in(calc_seq)
     
         calculated_sequences.append(conv_seq)
-        print(conv_seq)
+        print("conv_seq",conv_seq)
         nussinov_path = nussinov_modules(conv_seq)
         if len(nussinov_path) != 1: 
             print("Warning: There are more than one optimal folding paths for this sequence. Reconsider your input")
         if nussinov_path[0] == path and len(nussinov_path) == 1:
-            print("works:",pertable_path)
+            print("works:",pairtable_path)
             print(nussinov_path,"calculated from nussinov")
             print("calculated sequence:",calc_seq) 
             succesfull += 1
 
         else:
             print("Error: Following Path does not match calulated path")
-            print(path,"Input",pertable_path)
+            print(path,"Input",pairtable_path)
             print("Following Paths were calculated from the Nussinov Algorithm")
             for path in nussinov_path:
                 print(path)
@@ -71,20 +71,20 @@ def check_paths(seq):
 
 def check_path(path): 
     """Takes a dot-bracket notation path and calculates the domain level sequence and then checks with nussi if the calculated sequence is equal to the input sequence"""
-    pertable_path = path_to_pertablepath(path)
-    calc_seq = fold_to_seq(pertable_path)
+    pairtable_path = path_to_pairtablepath(path)
+    calc_seq = fold_to_seq(pairtable_path)
     conv_seq = convert_pts_out_to_nussi_in(calc_seq)
     
     nussinov_path = nussinov(conv_seq)
     calculated_path = module_folding_path(nussinov_path,convert(conv_seq))
     if calculated_path == path:
-        print("works:",pertable_path)
+        print("works:",pairtable_path)
         print(calculated_path,"calculated from nussinov")
         print("calculated sequence:",calc_seq) 
        
     elif calculated_path != path:
         print("Error: Following Path does not match calulated path")
-        print(path,"Input",pertable_path)
+        print(path,"Input",pairtable_path)
         print(calculated_path,"calculated from nussinov")
         print("calculated sequence:",calc_seq)
     
@@ -92,6 +92,6 @@ check_paths(seq)
 
 
 #print(nussinov("ba*b*c*ecbadg*d*a*b*c*e*f*fecbadg"))
-#nussinov_path = nussinov("bla*b*c*lecbadlg*d*a*b*c*e*f*lfecbadg")
+#nussinov_path = nussinov(" blf*a*b*c*g*ldcbaele*a*b*c*d*lhgcbafili*f*a*b*c*g*h*")
 #print(nussinov_path)
-#print(module_folding_path(nussinov_path,convert("bla*b*c*lecbadlg*d*a*b*c*e*f*lfecbadg")))
+#print(nussinov_modules(nussinov_path))

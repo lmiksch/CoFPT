@@ -21,17 +21,17 @@ class module():
     def __str__(self):
             return f"{self.praefix}{self.name}{self.suffix}"
 
-def pertable_to_path(pertable):
+def pairtable_to_path(pairtable):
     path = []
-    for x in range(len(pertable)):
+    for x in range(len(pairtable)):
         struct = []
         
-        for i in range(1,pertable[x][0]+1):
-            if pertable[x][i] > i:
+        for i in range(1,pairtable[x][0]+1):
+            if pairtable[x][i] > i:
                 struct.append("(")
-            elif pertable[x][i] < i and pertable[x][i] != 0:
+            elif pairtable[x][i] < i and pairtable[x][i] != 0:
                 struct.append(")")
-            elif pertable[x][i] == 0:
+            elif pairtable[x][i] == 0:
                 struct.append(".")
         
         path.append("".join(struct))
@@ -49,6 +49,7 @@ def fold_to_seq(path):
         new_string (str): A string of domains which should follow the given folding path. 
 
     """
+    
     domains = list(string.ascii_lowercase)
     for x in range(len(string.ascii_lowercase)):
         for  z in range(len(string.ascii_lowercase)):
@@ -71,7 +72,9 @@ def fold_to_seq(path):
         seq.append(globals()["block%s" % x])
 
     for x in range(1,len(path)): 
+        
         for y in range(1,len(path[x])-1):
+            
                 z = False
                 try:
                     if path[x-1][path[x][y]] == 0:
@@ -89,16 +92,29 @@ def fold_to_seq(path):
                     domain_pointer += 1
                    
                 if path[x][y+1] == 0:
-                    t = y -1
+                    t = y 
+
+                    #praefix addition + modification
                     globals()["block%s" % t].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % t].praefix
+                    
+                    
+                 
+                    #print("else", globals()["block%s" % path[x][t]].suffix)
+                    globals()["block%s" % path[x][t]].suffix = globals()["block%s" % t].praefix[::-1] 
                     domain_pointer += 1
-                    globals()["block%s" % t].suffix = globals()["block%s" % t].suffix+ " " + domains[domain_pointer]
 
-
-                    globals()["block%s" % path[x][t]].suffix = globals()["block%s" % t].praefix[::-1]
-                    globals()["block%s" % path[x][t]].praefix = globals()["block%s" % t].suffix[::-1]
-                    domain_pointer += 1
+                    #suffix addition + modification
+                    globals()["block%s" % t].suffix = globals()["block%s" % t].suffix + " " + domains[domain_pointer]
+                    
                 
+                    globals()["block%s" % path[x][t]].praefix = globals()["block%s" % t].suffix[::-1] #+ globals()["block%s" % path[x][t]].praefix
+                    domain_pointer += 1
+
+
+                    #globals()["block%s" % y].praefix = "".join(set(globals()["block%s" % y].praefix))
+                    #globals()["block%s" % y].suffix = "".join(set(globals()["block%s" % y].suffix))
+                    #globals()["block%s" % [x][t]].praefix = "".join(set(globals()["block%s" % [x][t]].praefix))
+                    #globals()["block%s" % [x][t]].suffix = "".join(set(globals()["block%s" % [x][t]].suffix))
     #part which adds * notation for complementary
 
     for x in range(1,len(seq)+1):
@@ -141,15 +157,30 @@ def allready_paired(step,x,y,path):
 
 
 
-if __name__=="__main__":
+if __name__== "__main__":
     print("Imported path_to_seq")
 
 
     path2 = [[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 2, 1, 4, 3], [5, 0, 3, 2, 5, 4]]
-    path = [[1,0],[2,2,1],[3,2,1,0],[4,2,1,4,3]]
+    path = [[1,0],[2,2,1],[3,0,3,2],[4,2,1,4,3],[5,0,5,4,3,2],[6,2,1,4,3,6,5]]
+
+
+    problem = [[0, 0], [2, 2, 1], [3, 2, 1, 0], [4, 4, 3, 2, 1], [5, 4, 3, 2, 1, 0]]
+    new_path = []
 
     
-    print(fold_to_seq(path2))
+    print(fold_to_seq(path))
         
    
 #print(fold_to_seq(path2))
+
+
+"""[[0, 0], [2, 2, 1], [3, 2, 1, 0], [4, 4, 3, 2, 1], [5, 0, 5, 4, 3, 2]]
+dcbaelf*a*b*c*g*lkhbijlj*i*b*h*k*lgcbaf
+input: dcbaelf*a*b*c*g*lkhbijlj*i*b*h*k*lgcbaf
+[[''], ['.'], ['..'], ['...'], ['....'], ['.....'], ['......'], ['.......'], ['...(...)'], ['..((...))'], ['.(((...)))'], ['.(((...))).'], ['.(((...)))..'], ['.(((...)))...'], ['.(((...)))....'], ['.(((...))).....'], ['.(((...)))......'], ['.(((...))).......'], ['.(((...)))........'], ['.(((...)))......(.)'], ['.(((...))).....((.))'], ['.(((...)))....(((.)))'], ['.(((...)))...((((.))))'], ['.(((...)))..(((((.)))))'], ['.(((...)))..(((((.))))).'], ['.(((...)))(.(((((.))))).)'], ['..((...))((.(((((.))))).))', '.(((...)))(.(((((.))))).).'], ['...(...)(((.(((((.))))).)))', '..((...))((.(((((.))))).)).', '.(((...)))(.(((((.))))).)..'], ['.......((((.(((((.))))).))))', '...(...)(((.(((((.))))).))).', '..((...))((.(((((.))))).))..', '.(((...)))(.(((((.))))).)...'], ['......(((((.(((((.))))).)))))']]
+Error: Following Path does not match calulated path
+['.', '()', '().', '(())', '.(())'] Input [[0, 0], [2, 2, 1], [3, 2, 1, 0], [4, 4, 3, 2, 1], [5, 0, 5, 4, 3, 2]]
+Following Paths were calculated from the Nussinov Algorithm
+['.', '()', '().', '()()', '.(())']
+calculated sequence: d c  b  a e  l  f* a* b* c* g*  l  k h  b  i j  l  j* i* b* h* k*  l  g c  b  a f"""
