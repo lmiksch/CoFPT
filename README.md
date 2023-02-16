@@ -5,21 +5,16 @@ This script was created during the course software project in the bioinformatics
 CotFPD is a python based script which consits of two steps: 
 
 * domain_seq_generator: Given a folding path as an input, it creates a domain based sequence which should fold like the given input.  
-* ir_domain_translator: With the domain based sequence, this part now translates the domain based sequence into a nucleotide sequence using the Infrared Package. 
+* ir_domain_translator: With the domain based sequence, this part now translates the domain based sequence into a nucleotide sequence using the [Infrared Package](https://www.lix.polytechnique.fr/~will/Software/Infrared/Doc/index.html). 
 
 
 ## Prerequisites
 
 Following packages need to be installed to use ir_domain_translator: 
 
-	ViennaRNA Package: 
+[ViennaRNA Package](https://github.com/ViennaRNA/ViennaRNA)
 
-		-https://github.com/ViennaRNA/ViennaRNA
-
-	Infrared Package: 
-	
-		-https://www.lix.polytechnique.fr/~will/Software/
-		 Infrared/Doc/index.html
+[Infrared Package](https://www.lix.polytechnique.fr/~will/Software/Infrared/Doc/index.html)
 
 
 ## Getting Started
