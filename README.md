@@ -1,8 +1,8 @@
-# Cotranscriptional Folding Path designer
+# Cotranscriptional Folding Path translator
 
 This script was created during the course software project in the bioinformatics master at the university of vienna. 
 
-CotFPD is a python based script which consits of two steps: 
+CotFPT is a python based script which consits of two steps: 
 
 * domain_seq_generator: Given a folding path as an input, it creates a domain based sequence which should fold like the given input.  
 * ir_domain_translator: With the domain based sequence, this part now translates the domain based sequence into a nucleotide sequence using the [Infrared Package](https://www.lix.polytechnique.fr/~will/Software/Infrared/Doc/index.html). 

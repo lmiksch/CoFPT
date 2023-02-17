@@ -1,8 +1,7 @@
-import path_to_seq
-import nussinov
-import convert_functions
+from functions import nussinov
+from functions import convert_functions
 import argparse
-import path_to_seq
+from functions import path_to_seq
 import os 
 
 
@@ -13,7 +12,7 @@ import os
 parser = argparse.ArgumentParser(
                     prog = 'domain_seq_generator',
                     description = 'Translates an abstact folding path into a domain level sequence and applies nussinov to the domain based sequence',
-                    epilog = 'Text at the bottom of help')
+                )
 
 parser.add_argument("-i", metavar = "input ",  help="Input file needs to be a txt document where each line corresponds to a transcription step",type = str)
 

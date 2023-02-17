@@ -1,6 +1,6 @@
-import ir_domain_translator
-import nussinov
-import convert_functions
+from functions import ir_domain_translator
+from functions import nussinov
+from functions import convert_functions
 import argparse
 
 # -*- coding: utf-8 -*-

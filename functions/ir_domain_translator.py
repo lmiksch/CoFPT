@@ -1,8 +1,8 @@
 import infrared as ir 
 from infrared import rna
 import RNA 
-from convert_functions import *
-from nussinov import *
+from functions import convert_functions
+from functions import nussinov
 import random
 import math
 
@@ -191,7 +191,7 @@ def rna_design(seq,path):
     seqlen = 0
     no_space_seq = "".join(split_seq)
 
-    UL_seq = convert_to_UL(no_space_seq)
+    UL_seq = convert_functions.convert_to_UL(no_space_seq)
 
     #identicaldomains(True)
 
@@ -240,7 +240,7 @@ def rna_design(seq,path):
             model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
         for (i,j) in ss], 'energy')
         
-    model.set_feature_weight(-0.8, 'energy')
+    model.set_feature_weight(-0, 'energy')
  
     def rstd_objective(sequence):
     
@@ -342,7 +342,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
     split_seq = domain_seq.split()
         
     split_nt_sequence = []
-    UL_seq = convert_to_UL(domain_seq)
+    UL_seq = convert_functions.convert_to_UL(domain_seq)
         
     l_pointer = 0
     for z in split_seq:
