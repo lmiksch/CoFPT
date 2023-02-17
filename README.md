@@ -23,7 +23,7 @@ To use the scripts you need to clone the repository using git:
 
 ```bash
 # Clone this repository
-$ git clone https://github.com/lmiksch/Software_Project
+$ git clone https://github.com/lmiksch/CoFPT
 
 #Change your directory 
 $ cd Software_Project
