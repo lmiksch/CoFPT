@@ -183,7 +183,7 @@ def current_scores(nt_seqfp,extended_fp,seq):
         
         fe = fc.eval_structure(extended_fp[x].replace(".","x"))
         
-        mypath, barrier = call_findpath(seq_path[x],ss1,mfe_curr,0,30,mxb=30)
+        mypath, barrier = call_findpath(seq_path[x],ss1,extended_fp[x],0,30,mxb=30)
         
         
         #print(mypath)
@@ -358,12 +358,8 @@ def rna_design(seq,path):
         for x in range(1,len(extended_fp)):
 
             #prepare input for finpath 
-            fc = RNA.fold_compound(nt_path[x])
-            mfe_curr, e_curr = fc.mfe()
-
-            fc = RNA.fold_compound(nt_path[x-1])
-            mfe_prev , e_prev = fc.mfe()
-            ss1 = mfe_prev + ("." * (len(nt_path[x])-len(nt_path[x-1])))
+            
+            ss1 = extended_fp[x-1] + ("." * (len(nt_path[x])-len(nt_path[x-1])))
             #print(ss1)
             
             #print(nt_path[x])
@@ -373,7 +369,7 @@ def rna_design(seq,path):
             fc = RNA.fold_compound(nt_path[x])
             
             fe = fc.eval_structure(extended_fp[x].replace(".","x"))
-            mypath, barrier = call_findpath(nt_path[x],ss1,mfe_curr,0,20,mxb=10)
+            mypath, barrier = call_findpath(nt_path[x],ss1,extended_fp[x],0,20,mxb=10)
 
             #print(mypath)
             if mypath != None:
