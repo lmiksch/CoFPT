@@ -48,14 +48,20 @@ print("Domain Seq:", domain_seq)
 #nussinov for calculting domain level folding path
 mfp = nussinov.nussinov_modules(convert_functions.convert_pts_out_to_nussi_in(domain_seq))
 
-
+print(mfp)
+mfp = mfp[0]
 #checking if calculated path matches input path
+match = True
 for x in range(len(mfp)):
-    if mfp[0][x] != afp[x]:
-        print(mfp[0][x],afp[x])
-        print("Paths do not match")
+    if mfp[x] != afp[x]:
+        match = False
+if match == False:
+    print("Calulated Path does not match input path")
+    print("Calculated Path: ", mfp)
+    print("Given Path: ",afp)
+else:
+    print("Calculated path matches input path.")
 
-print("Calculated path matches input path.")
 
 with open("domain_seq_out.txt", "a") as output:
 

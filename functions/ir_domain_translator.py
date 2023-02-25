@@ -5,8 +5,7 @@ from functions import convert_functions
 from functions import nussinov
 import random
 import math
-
-
+import drtransformer 
 
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
@@ -105,7 +104,35 @@ def domain_path_to_nt_path(path,UL_seq):
 
     return ext_path
 
+def call_findpath(seq, ss1, ss2, md, fpw, mxb = float('inf')):
+    """ Call ViennaRNA findpath.
+    TODO: Find minimal motif and look it up in a cache.
+    """
+    fc = RNA.fold_compound(seq)
+    
+    if mxb == float('inf'):
+        path = fc.path_findpath(ss1, ss2, width = fpw)
+        
+    else:
+        e1 = round(fc.eval_structure(ss1), 2)
+        dcal_bound = int(round((mxb + e1)))
+        path = fc.path_findpath(ss1, ss2, maxE = dcal_bound, width = fpw)
+        
+    del fc
 
+    if len(path):
+        mypath = []
+        barrier = None
+        for step in path:
+            struct = step.s
+            energy = int(round(step.en))
+            mypath.append((struct, energy))
+            if barrier is None or barrier < energy:
+                barrier = energy
+        barrier -= int(round(path[0].en))
+        del step, path # potentially a good idea.
+        return mypath, barrier
+    return None, None
 
 
 
@@ -131,7 +158,48 @@ def add_folding_path_constraint(path,UL_seq,model):
 
         model.add_constraints(cons)
 
+def current_scores(nt_seqfp,extended_fp,seq):
+    """Calculates the final score of each sequence at each transcription step 
+    
+    """
+    seq_path = convert_functions.split_ntseq_to_domainfp(seq,d_seq)
+    print(seq_path)
+    scores = [0,]
+    for x in range(1,len(nt_seqfp)):
 
+        #prepare input for finpath 
+        fc = RNA.fold_compound(seq_path[x])
+        mfe_curr, e_curr = fc.mfe()
+
+        fc = RNA.fold_compound(seq_path[x-1])
+        mfe_prev , e_prev = fc.mfe()
+        ss1 = mfe_prev + ("." * (len(seq_path[x])-len(seq_path[x-1])))
+       
+        ss1 = extended_fp[x-1] + ("." * (len(nt_seqfp[x])-len(nt_seqfp[x-1])))
+       
+        efe = constrained_efe(nt_seqfp[x],extended_fp[x])
+        
+        fc = RNA.fold_compound(nt_seqfp[x])
+        
+        fe = fc.eval_structure(extended_fp[x].replace(".","x"))
+        
+        mypath, barrier = call_findpath(seq_path[x],ss1,mfe_curr,0,30,mxb=30)
+        
+        
+        #print(mypath)
+        if mypath != None:
+            deltaE = abs(abs(mypath[0][1]) - abs(mypath[-1][1]))
+        else: 
+            deltaE = 0
+            barrier = 0
+            #print("deltaE",deltaE)
+            #print("barrier",barrier)
+        global factor
+        factor  = 0.0001
+        scores.append(fe - efe + deltaE*factor + barrier*factor)
+        
+    return scores
+        
 
 
 
@@ -169,7 +237,7 @@ def constrained_efe(sequence,c):
         
         """
         fc = RNA.fold_compound(sequence)
-        fc.hc_add_from_db(c) # not sure if it's necessary to add constraint
+        # fc.hc_add_from_db(c) # not sure if it's necessary to add constraint
         return fc.pf()[1]
 
 
@@ -187,6 +255,8 @@ def rna_design(seq,path):
     print("Given sequence: ",seq)
     print("Given path: ",path)
     split_seq = seq.split()
+    global d_seq
+    d_seq = seq
   
     seqlen = 0
     no_space_seq = "".join(split_seq)
@@ -212,6 +282,9 @@ def rna_design(seq,path):
     print("Running Calculations")
     model = ir.Model(seqlen,4)
 
+
+    
+
     
     add_folding_path_constraint(path,UL_seq,model)
 
@@ -220,7 +293,7 @@ def rna_design(seq,path):
     unique_domains = "".join(set(UL_seq))
     for domain in  unique_domains:
 
-        
+        #if domain != "l":
         identical_domains_constraint(domain,UL_seq,model)
 
 
@@ -231,17 +304,31 @@ def rna_design(seq,path):
 
     extended_fp = domain_path_to_nt_path(path,UL_seq)
 
-    #addition of energy to ou model
+    #addition of energy to our model
     print(extended_fp)
 
-    
-    for x in extended_fp: 
-            ss = rna.parse(x)
-            model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
-        for (i,j) in ss], 'energy')
+    """
+        for x in extended_fp: 
+                ss = rna.parse(x)
+                model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
+            for (i,j) in ss], 'energy')
+        energy = -0.5
+        model.set_feature_weight(energy, 'energy')
         
-    model.set_feature_weight(-0, 'energy')
- 
+    """
+    
+    #controlling gc content since adding energy will generate a gc bias
+    GCcont = -0.2 
+    gc_funs = [rna.GCCont(i) for i in range(seqlen)]
+    model.add_functions(gc_funs, "gc")
+    model.set_feature_weight(GCcont, "gc")
+    
+
+
+
+
+
+
     def rstd_objective(sequence):
     
         split_nt_sequence = []
@@ -269,12 +356,41 @@ def rna_design(seq,path):
         total = 0
         
         for x in range(1,len(extended_fp)):
+
+            #prepare input for finpath 
+            fc = RNA.fold_compound(nt_path[x])
+            mfe_curr, e_curr = fc.mfe()
+
+            fc = RNA.fold_compound(nt_path[x-1])
+            mfe_prev , e_prev = fc.mfe()
+            ss1 = mfe_prev + ("." * (len(nt_path[x])-len(nt_path[x-1])))
+            #print(ss1)
+            
+            #print(nt_path[x])
+            #print(ss1)
+            #print(extended_fp[x])
             efe = constrained_efe(nt_path[x],extended_fp[x])
             fc = RNA.fold_compound(nt_path[x])
-            fe = fc.eval_structure(extended_fp[x])
             
-            total += fe - efe
-        
+            fe = fc.eval_structure(extended_fp[x].replace(".","x"))
+            mypath, barrier = call_findpath(nt_path[x],ss1,mfe_curr,0,20,mxb=10)
+
+            #print(mypath)
+            if mypath != None:
+                deltaE = abs(abs(mypath[0][1]) - abs(mypath[-1][1]))
+                print("ping")
+            else: 
+                print("oof")
+                deltaE = 99
+                barrier = 99
+            #print("deltaE",deltaE)
+            #print("barrier",barrier)
+
+            
+            global factor
+            factor  = 0.0001
+            total += fe - efe + deltaE*factor + barrier*factor
+            print(fe, efe, deltaE, barrier)
         
         return total
 
@@ -282,7 +398,7 @@ def rna_design(seq,path):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 1000, temp = 0.04)
 
 
 
@@ -291,6 +407,8 @@ def rna_design(seq,path):
     f = open("IR_output.txt", "a")
     print("done")
     print(" ")
+    f.write("\n")
+    f.write("\n")
     print("Calculated NT sequence:")
     f.write("Calculated NT sequence: \n")
     print(rna.ass_to_seq(best), -best_val)
@@ -308,9 +426,12 @@ def rna_design(seq,path):
 
     #Visualization
    
+    final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)))
 
+    i = 0
     print("\n")   
-    
+    f.write(seq)
+    f.write("\n")
     print(" ")
     print("Resulting Module Folding Path with calculated structure using RNAfold")   
     f.write("Resulting Module Folding Path with calculated structure using RNAfold") 
@@ -323,9 +444,22 @@ def rna_design(seq,path):
         f.write(z)
         f.write(" \n")
         f.write(mfe_struct)
+        f.write("  Score: ")
+        f.write(str(final_scores[i]))
         f.write(" \n")
+        print(" ")
+        i += 1
+    
+    f.write("GCcont:")
+    f.write(str(GCcont))
+    f.write("   factor in objective function:")
+    f.write(str(factor))
+    print("")
+        
     #output include all folding path structures so (),().,()(), with rnafold
-
+    print(convert_functions.extended_domain_path(UL_seq))
+    f.write(convert_functions.extended_domain_path(UL_seq))
+  
 
 def split_ntseq_to_domainfp(nt_seq,domain_seq):
     """split_ntseq_to_domainfp converts the nucleotide output into a list with sublists where each sublist corresponds to the sequence at the respective transcription step 

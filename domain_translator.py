@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(
                     description = 'Translates a domain level sequence into a nucleotide sequence.',
                 )
 
-parser.add_argument("-i", metavar = "input ",  help="Input must be the output of doman_seq_generrator otherwise a domain level seq needs to be specified.",type = str)
+parser.add_argument("-i", metavar = "input ",  help="Input must be the output of doman_seq_generator otherwise a domain level seq needs to be specified.",type = str)
 
 
 args = parser.parse_args()
