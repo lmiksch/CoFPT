@@ -114,7 +114,7 @@ def call_findpath(seq, ss1, ss2, md, fpw, mxb = float('inf')):
         path = fc.path_findpath(ss1, ss2, width = fpw)
         
     else:
-        e1 = round(fc.eval_structure(ss1), 2)
+        e1 = round(fc.eval_structure(ss1), 4)
         dcal_bound = int(round((mxb + e1)))
         path = fc.path_findpath(ss1, ss2, maxE = dcal_bound, width = fpw)
         
@@ -125,11 +125,11 @@ def call_findpath(seq, ss1, ss2, md, fpw, mxb = float('inf')):
         barrier = None
         for step in path:
             struct = step.s
-            energy = int(round(step.en))
+            energy = float(round(step.en,4))
             mypath.append((struct, energy))
             if barrier is None or barrier < energy:
                 barrier = energy
-        barrier -= int(round(path[0].en))
+        barrier -= float(round(path[0].en,4))
         del step, path # potentially a good idea.
         return mypath, barrier
     return None, None
@@ -224,6 +224,7 @@ def mc_optimize(model, objective, steps, temp, start=None):
             cc = random.choices(ccs,weights)[0]
             new = sampler.resample(cc, cur)
             newval = objective(new)
+            print("\rCurrent Score: ",newval, end="")
             if (newval >= curval
                 or random.random() <= math.exp((newval-curval)/temp)):
                 cur, curval = new, newval
@@ -293,8 +294,8 @@ def rna_design(seq,path):
     unique_domains = "".join(set(UL_seq))
     for domain in  unique_domains:
 
-        #if domain != "l":
-        identical_domains_constraint(domain,UL_seq,model)
+        if domain != "l":
+            identical_domains_constraint(domain,UL_seq,model)
 
 
 
@@ -304,8 +305,8 @@ def rna_design(seq,path):
 
     extended_fp = domain_path_to_nt_path(path,UL_seq)
 
-    #addition of energy to our model
-    print(extended_fp)
+    #addition of energy to our model optional since this does not lead to better results
+   
 
     """
         for x in extended_fp: 
@@ -369,14 +370,14 @@ def rna_design(seq,path):
             fc = RNA.fold_compound(nt_path[x])
             
             fe = fc.eval_structure(extended_fp[x].replace(".","x"))
-            mypath, barrier = call_findpath(nt_path[x],ss1,extended_fp[x],0,20,mxb=10)
+            mypath, barrier = call_findpath(nt_path[x],ss1,extended_fp[x],0,10,mxb=10)
 
             #print(mypath)
             if mypath != None:
                 deltaE = abs(abs(mypath[0][1]) - abs(mypath[-1][1]))
-                print("ping")
+                #print("ping")
             else: 
-                print("oof")
+                #print("oof")
                 deltaE = 99
                 barrier = 99
             #print("deltaE",deltaE)
@@ -386,7 +387,7 @@ def rna_design(seq,path):
             global factor
             factor  = 0.0001
             total += fe - efe + deltaE*factor + barrier*factor
-            print(fe, efe, deltaE, barrier)
+            #print(fe, efe, deltaE, barrier)
         
         return total
 
@@ -394,7 +395,7 @@ def rna_design(seq,path):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 1000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
 
 
 
@@ -450,6 +451,7 @@ def rna_design(seq,path):
     f.write(str(GCcont))
     f.write("   factor in objective function:")
     f.write(str(factor))
+    f.write(" \n")
     print("")
         
     #output include all folding path structures so (),().,()(), with rnafold

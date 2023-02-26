@@ -17,7 +17,7 @@ def couple(pair):
 
 def fill(nm, rna,dir_matrix):
 	"""
-	Fill the matrix as per the Nussinov algorithm
+	Fill the matrix based on the rules of the Nussinov algorithm
 	"""
 	
 	minimal_loop_length = 0
@@ -86,29 +86,19 @@ def init_matrix(rna):
 	nm[:] = np.NAN
 
 	# init diaganols to 0
-	# few ways to do this: np.fill_diaganol(), np.diag(), nested loop, ...
+	
 	nm[range(M), range(M)] = 0
 	nm[range(1, len(rna)), range(len(rna) - 1)] = 0
 
 	return nm
 
 
-def total_pairs(rna):
-	paired = []
-	pairs = 0
-	for x in range(len(rna)):
-		for z in range(len(rna)):
-			if couple((rna[x],rna[z])) and x not in paired and z not in paired:
-				pairs += 1
-				paired.append(x)
-				paired.append(z)
-	return pairs
-
 def nussinov(rna):
 	"""
 	Takes a star notation rna sequence as input and puts out a list of lists where each sublist corresponds to the possible stuctures calculated by to nussinov algorithm for the given sequence
 	"""
 	input = rna
+	print(rna)
 	rna = convert(rna)
 	nm = init_matrix(rna)
 	M = len(rna)
@@ -124,8 +114,7 @@ def nussinov(rna):
 
 	structures = [[] for x in range(M+1)]
 
-	#change it so that it only evals module folding path
-
+	
 	module_indices = []
 		
 	for x in range(len(rna)):
@@ -135,13 +124,13 @@ def nussinov(rna):
 
 	
 	structures = []	
-	#print("module indices",module_indices)
+	
 	for x in module_indices:
-		#print("x = ",x,"-------------------")
+		
 		fold = []
 		
 		newm = nm[:x,:x]
-		#print(nm)
+		
 	
 		new_dir_matrix = [[] for x in range(M)]
 		for z in range(len(dir_matrix)):
@@ -162,19 +151,16 @@ def nussinov(rna):
 		traceback(new_dir_matrix, rna, fold, 0, x -1,folds,newm)
 		
 		final_folds = folds
-		#print(" ")
-		#print("folds",final_folds)
+		
 		result = []
 		for sublist in final_folds:
 			if len(set([i for j in sublist for i in j])) == len([i for j in sublist for i in j]):
 				result.append(sublist)
 		
-		#print("number pairs",number_pairs)
-		#print("result",result)
+	
 		result = [x for x in result if len(x) == number_pairs]
-		#print("RESULT",result)
-		if len(result) == 0:
-			print("-------------------------------------------------------",rna)
+		
+		
 		cur_struct = []
 		for fold in result:
 			
@@ -187,30 +173,20 @@ def nussinov(rna):
 		structures.append(cur_struct)
 
 
-	#structures.insert(0,[""])
-	#structures[1] = ["."]
-	
-
-	#structures = remove_non_modules(structures,input)
-
-
-
-
 	return(structures)
 
 def traceback(dir_matrix, rna, fold, i, L,folds,nm):
 	"""
 	Traceback through matrix and explores all possible highest scoring graphs
 	"""
-	#print("traceback",dir_matrix)
+	
 	j = L 
 	global f_pointer
 	global check_rc 
 	global number_pairs
 	if i < j: 
 		for x in range(len(dir_matrix[i][j])):
-			#print("f_pointer",f_pointer)
-			#print("dirmatrix:   ",dir_matrix[i][j])
+			
 			if dir_matrix[i][j][x] == "d":
 				traceback(dir_matrix,rna, fold, i + 1,j,folds,nm)
 			elif dir_matrix[i][j][x] == "l":
@@ -262,11 +238,11 @@ def find_possible_structs(structures):
 				else: newitem = [newitem[0], sitem]
 				templist.append(flatten(newitem))
 
-	outlist = list(filter(lambda x: len(x)==len(structures), templist))  # remove some partial lists that also creep in;
+	outlist = list(filter(lambda x: len(x)==len(structures), templist))  
 	return(outlist)
 	
 
-def flatten(B):    # function needed for code below;
+def flatten(B):    
     A = []
     for i in B:
         if type(i) == list: A.extend(i)
@@ -299,7 +275,7 @@ def  convert_nussi_output(output,seq):
 		if seq[x] == "b":
 			struct.append(output[x])
 	struct = "".join(struct)
-	#print(struct)		
+	
 	return struct
 
 
@@ -398,7 +374,7 @@ def nussinov_modules(rna):
 	
 	
 	domain_folds = get_domain_folds(nussi_output,rna)
-	#print("domain folds:",domain_folds)
+	
 	possible_paths = find_possible_structs(domain_folds)
 
 	return possible_paths
@@ -408,8 +384,7 @@ def nussinov_modules(rna):
 
 
 if __name__ == "__main__":
-	# does not put out final structures for last folds:  bla*b*c*lgdcdcbaeaeflf*e*a*b*c*d*g*lb 
-	# input: ['.', '()', '.()', '(())', '(()).', '()(())', '.((()))']
+	# Test
 	print("nussi output:",nussinov("ebdlh*a*b*c*i*lfcbagld*b*e*lblg*a*b*c*f*licbah"))
 	
 

@@ -177,7 +177,7 @@ def extended_domain_path(domain_path):
     """ Extends domain level path to the corresponding nt path but with domains: abc -> aaa bbbbb ccc
 
     Args:
-        domain_path (list): sublist correspond to transcription path sequence
+        domain_path (list): sublist correspond to  path sequence
     
     Returns: 
         full_path (list): extended path 

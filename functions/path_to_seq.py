@@ -107,19 +107,16 @@ def fold_to_seq(path):
                     globals()["block%s" % t].suffix = globals()["block%s" % t].suffix + " " + domains[domain_pointer]
                     
                 
-                    globals()["block%s" % path[x][t]].praefix = globals()["block%s" % t].suffix[::-1] #+ globals()["block%s" % path[x][t]].praefix
+                    globals()["block%s" % path[x][t]].praefix = globals()["block%s" % t].suffix[::-1] 
                     domain_pointer += 1
 
 
-                    #globals()["block%s" % y].praefix = "".join(set(globals()["block%s" % y].praefix))
-                    #globals()["block%s" % y].suffix = "".join(set(globals()["block%s" % y].suffix))
-                    #globals()["block%s" % [x][t]].praefix = "".join(set(globals()["block%s" % [x][t]].praefix))
-                    #globals()["block%s" % [x][t]].suffix = "".join(set(globals()["block%s" % [x][t]].suffix))
+                    
     #part which adds * notation for complementary
 
     for x in range(1,len(seq)+1):
         if globals()["block%s" %x].star == False: 
-            #globals()["block%s" %x] = "*".join(re.findall("",globals()["block%s" %x].praefix))
+            
             globals()["block%s" %x].praefix = stars(globals()["block%s" %x].praefix)
             globals()["block%s" %x].suffix = stars(globals()["block%s" %x].suffix)
             globals()["block%s" %x].name = stars(globals()["block%s" %x].name)  
@@ -172,15 +169,3 @@ if __name__== "__main__":
     print(fold_to_seq(path))
         
    
-#print(fold_to_seq(path2))
-
-
-"""[[0, 0], [2, 2, 1], [3, 2, 1, 0], [4, 4, 3, 2, 1], [5, 0, 5, 4, 3, 2]]
-dcbaelf*a*b*c*g*lkhbijlj*i*b*h*k*lgcbaf
-input: dcbaelf*a*b*c*g*lkhbijlj*i*b*h*k*lgcbaf
-[[''], ['.'], ['..'], ['...'], ['....'], ['.....'], ['......'], ['.......'], ['...(...)'], ['..((...))'], ['.(((...)))'], ['.(((...))).'], ['.(((...)))..'], ['.(((...)))...'], ['.(((...)))....'], ['.(((...))).....'], ['.(((...)))......'], ['.(((...))).......'], ['.(((...)))........'], ['.(((...)))......(.)'], ['.(((...))).....((.))'], ['.(((...)))....(((.)))'], ['.(((...)))...((((.))))'], ['.(((...)))..(((((.)))))'], ['.(((...)))..(((((.))))).'], ['.(((...)))(.(((((.))))).)'], ['..((...))((.(((((.))))).))', '.(((...)))(.(((((.))))).).'], ['...(...)(((.(((((.))))).)))', '..((...))((.(((((.))))).)).', '.(((...)))(.(((((.))))).)..'], ['.......((((.(((((.))))).))))', '...(...)(((.(((((.))))).))).', '..((...))((.(((((.))))).))..', '.(((...)))(.(((((.))))).)...'], ['......(((((.(((((.))))).)))))']]
-Error: Following Path does not match calulated path
-['.', '()', '().', '(())', '.(())'] Input [[0, 0], [2, 2, 1], [3, 2, 1, 0], [4, 4, 3, 2, 1], [5, 0, 5, 4, 3, 2]]
-Following Paths were calculated from the Nussinov Algorithm
-['.', '()', '().', '()()', '.(())']
-calculated sequence: d c  b  a e  l  f* a* b* c* g*  l  k h  b  i j  l  j* i* b* h* k*  l  g c  b  a f"""
