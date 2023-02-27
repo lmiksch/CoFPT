@@ -86,15 +86,15 @@ A textfile will be created in where a nucleotide sequence is displayed as well a
 
 ## Evaluating the Nucleotide sequence
 
-It is recommended, to evalute the sequence using [DrTransformer](https://github.com/bad-ants-fleet/drtransformer). 
+It is recommended, to evalute the sequence using [DrTransformer](https://github.com/bad-ants-fleet/drtransformer). For this DrTransformer needs to be installed. 
 
-* Using DrTransformer to evaluate resulting nucleotide sequence
+* Example on how to use DrTransformer for the resulting nucleotide sequence
 
 	```bash
 	$echo nucleotide_sequence| DrTransformer
 	```
 
-The resulting output of DrTransformer can then be analysed using [DrForna](https://github.com/ViennaRNA/drforna)
+The resulting output of DrTransformer can then be analysed using the webbased tool [DrForna](https://github.com/ViennaRNA/drforna).
 
 
 
