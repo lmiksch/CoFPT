@@ -81,7 +81,19 @@ Input:
 
 Ouput: 
 
-A textfile will be created in where a nucleotide sequence is displayed aswell as the score of the corresponding sequence. 
+A textfile will be created in where a nucleotide sequence is displayed as well as the score of the corresponding sequence. 
+
+
+## Evaluating the Nucleotide sequence
+
+It is recommended, to evalute the sequence using [DrTransformer](https://github.com/bad-ants-fleet/drtransformer). 
+
+*Using DrTransformer to evaluate resulting nucleotide sequence
+	```bash
+	$echo nucleotide_sequence| DrTransformer
+	```
+	
+The resulting output of DrTransformer can then be analysed using [DrForna](https://github.com/ViennaRNA/drforna)
 
 
 
