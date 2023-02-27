@@ -71,7 +71,7 @@ Input:
 
 * Using the output file of domain_seq_generator.py 
 	```bash
-	$ pyhton3 ir_domain_translator -i domain_seq_out.txt
+	$ python3 ir_domain_translator -i domain_seq_out.txt
 	```
 * Using the command line to input a domain level sequence
 	```bash 
@@ -88,11 +88,12 @@ A textfile will be created in where a nucleotide sequence is displayed as well a
 
 It is recommended, to evalute the sequence using [DrTransformer](https://github.com/bad-ants-fleet/drtransformer). 
 
-*Using DrTransformer to evaluate resulting nucleotide sequence
+* Using DrTransformer to evaluate resulting nucleotide sequence
+
 	```bash
 	$echo nucleotide_sequence| DrTransformer
 	```
-	
+
 The resulting output of DrTransformer can then be analysed using [DrForna](https://github.com/ViennaRNA/drforna)
 
 
