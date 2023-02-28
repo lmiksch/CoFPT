@@ -213,7 +213,7 @@ def current_scores(nt_seqfp,extended_fp,seq):
         mse = (deltaE - (fe - E_1)/x)**2
         global factor
         
-        scores.append(fe - efe + mse*0.00000001  + barrier*0.0001)
+        scores.append(abs(efe) -abs(fe) + mse*0.00000001  + barrier*0.0001)
         
         
     return scores
@@ -252,7 +252,7 @@ def mc_optimize(model, objective, steps, temp, start=None):
         return (best, bestval)
 
 def constrained_efe(sequence,c):
-        """Calculates the ensemble free energy of sequence given constraint c
+        """Calculates the ensemble free energy of sequence
         
         """
         fc = RNA.fold_compound(sequence)
@@ -412,7 +412,7 @@ def rna_design(seq,path):
             mse = (deltaE - (fe - E_1)/x)**2
             global factor
             
-            total += fe - efe + mse*0.00000001  + barrier*0.0001
+            total += (abs(efe)- abs(fe)) + mse*0.00000001  + barrier*0.0001
             
             
         return total
