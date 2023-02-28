@@ -44,13 +44,16 @@ Input is given as a txt file where each line break indicates a new transcription
 ()
 .()
 ()()
+.(())
+()()()
 ```
 Example command:
 
 ```bash
-$ python3 domain_seq_generator.py -i input_test.txt
+$ python3 domain_seq_generator.py -i example/test_input.txt
 
 ```
+Further examples are provided in the example folder
 
 Output: 
 
