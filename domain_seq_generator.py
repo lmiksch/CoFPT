@@ -46,9 +46,9 @@ domain_seq = path_to_seq.fold_to_seq(input)
 print("Domain Seq:", domain_seq)
 
 #nussinov for calculting domain level folding path
-mfp = nussinov.nussinov_modules(convert_functions.convert_pts_out_to_nussi_in(domain_seq))
+mfp = nussinov.nussinov_modules(domain_seq)
 
-print(mfp)
+print("Calculated path from nussinov:",mfp)
 mfp = mfp[0]
 #checking if calculated path matches input path
 match = True

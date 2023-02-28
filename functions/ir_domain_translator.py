@@ -1,11 +1,11 @@
 import infrared as ir 
 from infrared import rna
 import RNA 
-from functions import convert_functions
+from functions import convert_functions as cv
 from functions import nussinov
 import random
 import math
-import drtransformer 
+
 
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
@@ -105,8 +105,7 @@ def domain_path_to_nt_path(path,UL_seq):
     return ext_path
 
 def call_findpath(seq, ss1, ss2, md, fpw, mxb = float('inf')):
-    """ Call ViennaRNA findpath.
-    TODO: Find minimal motif and look it up in a cache.
+    """ Call ViennaRNA findpath. Modified from DrTransformer
     """
     fc = RNA.fold_compound(seq)
     
@@ -158,12 +157,16 @@ def add_folding_path_constraint(path,UL_seq,model):
 
         model.add_constraints(cons)
 
+
+
+
+
 def current_scores(nt_seqfp,extended_fp,seq):
     """Calculates the final score of each sequence at each transcription step 
     
     """
-    seq_path = convert_functions.split_ntseq_to_domainfp(seq,d_seq)
-    print(seq_path)
+    seq_path = cv.split_ntseq_to_domainfp(seq,d_seq)
+    
     scores = [0,]
     for x in range(1,len(nt_seqfp)):
 
@@ -175,11 +178,11 @@ def current_scores(nt_seqfp,extended_fp,seq):
         mfe_prev , e_prev = fc.mfe()
         ss1 = mfe_prev + ("." * (len(seq_path[x])-len(seq_path[x-1])))
        
-        ss1 = extended_fp[x-1] + ("." * (len(nt_seqfp[x])-len(nt_seqfp[x-1])))
+        ss1 = extended_fp[x-1] + ("." * (len(seq_path[x])-len(seq_path[x-1])))
        
-        efe = constrained_efe(nt_seqfp[x],extended_fp[x])
+        efe = constrained_efe(seq_path[x],extended_fp[x])
         
-        fc = RNA.fold_compound(nt_seqfp[x])
+        fc = RNA.fold_compound(seq_path[x])
         
         fe = fc.eval_structure(extended_fp[x].replace(".","x"))
         
@@ -188,15 +191,30 @@ def current_scores(nt_seqfp,extended_fp,seq):
         
         #print(mypath)
         if mypath != None:
-            deltaE = abs(abs(mypath[0][1]) - abs(mypath[-1][1]))
+            deltaE = abs(mypath[-1][1]) - abs(mypath[0][1])
         else: 
-            deltaE = 0
-            barrier = 0
-            #print("deltaE",deltaE)
-            #print("barrier",barrier)
+            deltaE = 99
+            barrier = 99
+     
+        E_1_fc = RNA.fold_compound(seq_path[0])
+        E_1 = E_1_fc.eval_structure(extended_fp[0].replace(".","x"))
+       
+
+        E_i_fc = RNA.fold_compound(seq_path[x])
+        E_i = E_i_fc.eval_structure(extended_fp[x].replace(".","x"))
+
+        E_i1_fc = RNA.fold_compound(seq_path[x])
+        E_i1 = E_i1_fc.eval_structure(extended_fp[x].replace(".","x"))
+
+        deltaE = E_i - E_i1
+
+
+        
+        mse = (deltaE - (fe - E_1)/x)**2
         global factor
-        factor  = 0.0001
-        scores.append(fe - efe + deltaE*factor + barrier*factor)
+        
+        scores.append(fe - efe + mse*0.00000001  + barrier*0.0001)
+        
         
     return scores
         
@@ -262,7 +280,7 @@ def rna_design(seq,path):
     seqlen = 0
     no_space_seq = "".join(split_seq)
 
-    UL_seq = convert_functions.convert_to_UL(no_space_seq)
+    UL_liste = cv.UL_list(split_seq)
 
     #identicaldomains(True)
 
@@ -276,8 +294,8 @@ def rna_design(seq,path):
     
 
     #calculates Sequence length
-    for x in range(len(split_seq)):
-        seqlen += d_length(split_seq[x])
+    for x in range(len(UL_liste)):
+        seqlen += d_length(UL_liste[x])
        
 
     print("Running Calculations")
@@ -287,15 +305,15 @@ def rna_design(seq,path):
     
 
     
-    add_folding_path_constraint(path,UL_seq,model)
+    add_folding_path_constraint(path,UL_liste,model)
 
 
     #applies constraint, that same domains should have the same sequence
-    unique_domains = "".join(set(UL_seq))
+    unique_domains = "".join(set(UL_liste))
     for domain in  unique_domains:
 
         if domain != "l":
-            identical_domains_constraint(domain,UL_seq,model)
+            identical_domains_constraint(domain,UL_liste,model)
 
 
 
@@ -303,20 +321,20 @@ def rna_design(seq,path):
     
     #optimization
 
-    extended_fp = domain_path_to_nt_path(path,UL_seq)
+    extended_fp = domain_path_to_nt_path(path,UL_liste)
 
     #addition of energy to our model optional since this does not lead to better results
    
 
+    
+    """for x in extended_fp: 
+            ss = rna.parse(x)
+            model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
+        for (i,j) in ss], 'energy')
+    energy = -0.5
+    model.set_feature_weight(energy, 'energy')
     """
-        for x in extended_fp: 
-                ss = rna.parse(x)
-                model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
-            for (i,j) in ss], 'energy')
-        energy = -0.5
-        model.set_feature_weight(energy, 'energy')
-        
-    """
+    
     
     #controlling gc content since adding energy will generate a gc bias
     GCcont = -0.2 
@@ -346,8 +364,8 @@ def rna_design(seq,path):
         
         nt_path = []
 
-        for  x in range(len(UL_seq)):
-            if UL_seq[x] == "l":
+        for  x in range(len(UL_liste)):
+            if UL_liste[x] == "l":
             
                 
                 nt_path.append("".join(split_nt_sequence[:x+1]))
@@ -361,34 +379,42 @@ def rna_design(seq,path):
             #prepare input for finpath 
             
             ss1 = extended_fp[x-1] + ("." * (len(nt_path[x])-len(nt_path[x-1])))
-            #print(ss1)
-            
-            #print(nt_path[x])
-            #print(ss1)
-            #print(extended_fp[x])
+         
             efe = constrained_efe(nt_path[x],extended_fp[x])
             fc = RNA.fold_compound(nt_path[x])
             
             fe = fc.eval_structure(extended_fp[x].replace(".","x"))
             mypath, barrier = call_findpath(nt_path[x],ss1,extended_fp[x],0,10,mxb=10)
 
-            #print(mypath)
+           
             if mypath != None:
-                deltaE = abs(abs(mypath[0][1]) - abs(mypath[-1][1]))
-                #print("ping")
+                deltaE = abs(mypath[-1][1]) - abs(mypath[0][1])
+                
             else: 
-                #print("oof")
+              
                 deltaE = 99
                 barrier = 99
-            #print("deltaE",deltaE)
-            #print("barrier",barrier)
+            
+            E_1_fc = RNA.fold_compound(nt_path[0])
+            E_1 = E_1_fc.eval_structure(extended_fp[0].replace(".","x"))
+            print
+
+            E_i_fc = RNA.fold_compound(nt_path[x])
+            E_i = E_i_fc.eval_structure(extended_fp[x].replace(".","x"))
+
+            E_i1_fc = RNA.fold_compound(nt_path[x])
+            E_i1 = E_i1_fc.eval_structure(extended_fp[x].replace(".","x"))
+
+            deltaE = E_i - E_i1
+
 
             
+            mse = (deltaE - (fe - E_1)/x)**2
             global factor
-            factor  = 0.0001
-            total += fe - efe + deltaE*factor + barrier*factor
-            #print(fe, efe, deltaE, barrier)
-        
+            
+            total += fe - efe + mse*0.00000001  + barrier*0.0001
+            
+            
         return total
 
 
@@ -402,7 +428,6 @@ def rna_design(seq,path):
 
     #Output generation
     f = open("IR_output.txt", "a")
-    print("done")
     print(" ")
     f.write("\n")
     f.write("\n")
@@ -418,13 +443,13 @@ def rna_design(seq,path):
     f.write("Length = ")
     f.write(str(len(rna.ass_to_seq(best))))
     f.write(" \n")
-    ntseq_fp = split_ntseq_to_domainfp(rna.ass_to_seq(best),seq)
+    ntseq_fp = cv.split_ntseq_to_domainfp(rna.ass_to_seq(best),d_seq)
 
 
     #Visualization
-   
+    
     final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)))
-
+    
     i = 0
     print("\n")   
     f.write(seq)
@@ -446,17 +471,12 @@ def rna_design(seq,path):
         f.write(" \n")
         print(" ")
         i += 1
-    
-    f.write("GCcont:")
-    f.write(str(GCcont))
-    f.write("   factor in objective function:")
-    f.write(str(factor))
     f.write(" \n")
     print("")
         
     #output include all folding path structures so (),().,()(), with rnafold
-    print(convert_functions.extended_domain_path(UL_seq))
-    f.write(convert_functions.extended_domain_path(UL_seq))
+    print(cv.extended_domain_path(UL_liste))
+    f.write(cv.extended_domain_path(UL_liste))
   
 
 def split_ntseq_to_domainfp(nt_seq,domain_seq):
@@ -474,7 +494,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
     split_seq = domain_seq.split()
         
     split_nt_sequence = []
-    UL_seq = convert_functions.convert_to_UL(domain_seq)
+    UL_list = cv.UL_list(domain_seq)
         
     l_pointer = 0
     for z in split_seq:
@@ -483,12 +503,12 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
         split_nt_sequence.append(nt_seq[l_pointer:r_pointer])
         l_pointer = r_pointer
         
-    print("Sequences Split up based on domains",split_nt_sequence)
+  
         
     nt_path = []
 
-    for  x in range(len(UL_seq)):
-        if UL_seq[x] == "l":
+    for  x in range(len(UL_list)):
+        if UL_list[x] == "l":
                 
             nt_path.append("".join(split_nt_sequence[:x+1]))
     nt_path.append(nt_seq)
@@ -502,26 +522,9 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
 
 
 if __name__ == "__main__":
-    
-    #example1 for path = [['.'],['()'],['.()'],['()()'],['.(())'],['()()()'],['.()(())'],['(()(()))']]
-    #seq = "b   l  f* a* b* c* g*  l  d c  b  a e  l  j* e* a* b* c* d* k*  l  h g c  b  a f i  l  i* f* a* b* c* g* h*  l  k d c  b  a e j  l   b*"
-    #path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((..)))))..'], ['..(((((.(((((..)))))...)))))..'], ['(...)...(((((..)))))..(((((((.))))))).'], ['...(((...)))..(((((((.(((((((.))))))).))))))).'], ['(..(((...)))..(((((((.(((((((.))))))).))))))).)']]
-    #rna_design(seq,path)
-
-    
-    #example [['.', '()', '.()', '(())', '.()()', '(()())']]
-    #seq = "b   l  a* b* c*  l  c  b  a  l  d* b* e*  l  e  b  d  l   b* "
-    #path = [['..'], ['(..)..'], ['..(((.))).'], ['(.(((.)))..)..'], ['..(((.))).(((.))).'], ['(.(((.))).(((.))).)']]
-    
-
-    #pres example
+    #example
     seq = " b   l  f* a* b* c* g*  l  d c  b  a e  l  e* a* b* c* d*  l  h g c  b  a f i  l  i* f* a* b* c* g* h*"
     path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((.))))).'], ['..(((((.(((((.)))))..)))))..'], ['(...)...(((((.))))).(((((((.)))))))']]
-    
-
-    #pres example 2 long seq ['.', '()', '.()', '()()', '.()()', '()()()', '.(()())', '((()()))', '((()())).', '((()()))()']
-    #seq = " v  b  u  l  j* d* a* b* c* e* k*  l  t m i f c  b  a g h n s  l  r* o* h* g* a* b* c* f* i* p* q*  l  z w q p i f c  b  a g h o r x y  l  y* x* r* o* h* g* a* b* c* f* i* p* q* w* z*  l  k e c  b  a d j  l  u* b* v*  l   b   l   b* "
-    #path = [['....'], ['.(.....)....'], ['......(((.......))).....'], ['.(.....)......(((((((.....)))))))...'], ['......(((.......))).....(((((((((((...)))))))))))...'], ['.(.....)......(((((((.....)))))))...(((((((((((((((.))))))))))))))).'], ['....(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).'], ['(((.(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).))).'], ['(((.(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).)))...'], ['(((.(((((((...(((((((.....)))))))...(((((((((((((((.))))))))))))))).))))))).))).(.)']]
     
 
 
