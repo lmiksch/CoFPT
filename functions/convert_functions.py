@@ -214,7 +214,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
     split_seq = domain_seq.split()
         
     split_nt_sequence = []
-    UL_seq = convert_to_UL(domain_seq)
+    UL_seq = UL_list(split_seq)
         
     l_pointer = 0
     for z in split_seq:
@@ -223,7 +223,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
         split_nt_sequence.append(nt_seq[l_pointer:r_pointer])
         l_pointer = r_pointer
         
-    print("Sequences Split up based on domains",split_nt_sequence)
+    
         
     nt_path = []
 
@@ -235,12 +235,29 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
 
     return nt_path
 
+def UL_list(list):
+    """ Converts a list of domains into UL list
+    """
+    UL_liste = []
+    for x in range(len(list)):
+        if list[x][-1] == "*":
+            
+            UL_liste.append(list[x][:-1].upper())
+        else:
+            UL_liste.append(list[x])
+
+    return(UL_liste)
+
+
+
 
 if __name__=="__main__":
     print("convert_functions")
     print(path_to_pairtablepath(['.', '()', '.()', '(())']))
     #get_module_fp_sequences("AAABBBBBCCCLLLCCCBBBBBAAALLLBBBBBBBBBB")
     print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))
+
+    print(UL_list("a aa* c av* a d e b b* bbb*".split()))
 
 
 

@@ -8,6 +8,7 @@ Nussinov-Jacobson python algorithm implementation
 import numpy as np
 import itertools
 import pandas as pd
+from functions import convert_functions as cv 
 
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
@@ -97,19 +98,21 @@ def nussinov(rna):
 	"""
 	Takes a star notation rna sequence as input and puts out a list of lists where each sublist corresponds to the possible stuctures calculated by to nussinov algorithm for the given sequence
 	"""
-	input = rna
-	print(rna)
-	rna = convert(rna)
-	nm = init_matrix(rna)
-	M = len(rna)
 	
+	
+
+	split_seq = rna.split()
+	
+	UL_liste = cv.UL_list(split_seq)
+	
+	nm = init_matrix(UL_liste)
+	M = len(UL_liste)
 	dir_matrix = [[] for x in range(M)]
 	for x in range(M):
 		dir_matrix[x] = [[] for x in range(M)]  
 
 		
-	nm, dir_matrix = fill(nm, rna,dir_matrix)
-
+	nm, dir_matrix = fill(nm, UL_liste,dir_matrix)
 
 
 	structures = [[] for x in range(M+1)]
@@ -117,10 +120,10 @@ def nussinov(rna):
 	
 	module_indices = []
 		
-	for x in range(len(rna)):
-		if rna[x] == "l":
+	for x in range(len(UL_liste)):
+		if UL_liste[x] == "l":
 			module_indices.append(x+1)
-	module_indices.append(len(rna))
+	module_indices.append(len(UL_liste))
 
 	
 	structures = []	
@@ -148,7 +151,7 @@ def nussinov(rna):
 		global number_pairs
 		number_pairs = nm[0][x-1]
 
-		traceback(new_dir_matrix, rna, fold, 0, x -1,folds,newm)
+		traceback(new_dir_matrix, UL_liste, fold, 0, x -1,folds,newm)
 		
 		final_folds = folds
 		
@@ -340,12 +343,10 @@ def remove_non_modules(structures,seq):
 
 def get_domain_folds(structures,rna):
 	result = [[[] for z in range(len(structures[x]))] for x in range(len(structures))]
-	rna = convert(rna)
+	
 	for x in range(len(structures)):
 		for i in range(len(structures[x])):
-			
 			for z in range(len(structures[x][i])):
-				
 				if rna[z] == "b" or rna[z] == "B":
 					result[x][i].append(structures[x][i][z])
 			result[x][i] = "".join(result[x][i])
@@ -370,10 +371,10 @@ def nussinov_modules(rna):
 	
 
 	nussi_output = nussinov(rna)
-	print(nussi_output)
+	print("nussi output:",nussi_output)
 	
-	
-	domain_folds = get_domain_folds(nussi_output,rna)
+	UL_liste = cv.UL_list(rna.split())
+	domain_folds = get_domain_folds(nussi_output,UL_liste)
 	
 	possible_paths = find_possible_structs(domain_folds)
 
@@ -385,7 +386,7 @@ def nussinov_modules(rna):
 
 if __name__ == "__main__":
 	# Test
-	print("nussi output:",nussinov("ebdlh*a*b*c*i*lfcbagld*b*e*lblg*a*b*c*f*licbah"))
+	print("nussi output:",nussinov_modules(" b   l  d* aa* b* c* e*  l  i f c  b  aa g h  l  h* g* aa* b* c* f* i*  l  j e c  b  aa d k  l  k* d* aa* b* c* e* j*"))
 	
 
 

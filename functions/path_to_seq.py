@@ -86,9 +86,14 @@ def fold_to_seq(path):
                     domain_pointer += 1
                     globals()["block%s" % y].suffix = globals()["block%s" % y].suffix+ " " + domains[domain_pointer]
 
+                    praefix_split = globals()["block%s"  % y].praefix.split()
+                    praefix_rev = " ".join(praefix_split[::-1])
 
-                    globals()["block%s" % path[x][y]].suffix =  globals()["block%s"  % y].praefix[::-1]
-                    globals()["block%s" % path[x][y]].praefix = globals()["block%s"  % y].suffix[::-1]
+                    suffix_split = globals()["block%s"  % y].suffix.split()
+                    suffix_rev = " ".join(suffix_split[::-1])
+
+                    globals()["block%s" % path[x][y]].suffix =  praefix_rev
+                    globals()["block%s" % path[x][y]].praefix = suffix_rev
                     domain_pointer += 1
                    
                 if path[x][y+1] == 0:

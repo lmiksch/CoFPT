@@ -21,14 +21,14 @@ parser.add_argument("-i", metavar = "input ",  help="Input must be the output of
 args = parser.parse_args()
 
 input_file = args.i
+try:
+    with open(input_file) as file:
+        input = [line.rstrip() for line in file]
 
-with open(input_file) as file:
-    input = [line.rstrip() for line in file]
-
-
-
-print("Domain Seq from input file: ",input[3])
-input = input[3]
+    print("Domain Seq from input file: ",input[3])
+    input = input[3]
+except:
+    args.i = None
 
 if args.i == None: 
 	input = input("Input here a domain level sequence:")
@@ -39,20 +39,15 @@ if args.i == None:
 
 domain_seq = input
 
-domain_seq = domain_seq.replace(" ","")
 
-while input[0] == " ":
-    input = input[1:]
-
-while input[-1] == " ":
-    input = input[:-1]
-
+print("Calculating nussinov")
 nussi_output = nussinov.nussinov(domain_seq)
 
 
 
 # Nussinov to get extended folding path 
 print("\n", "Running Translation")
+print(input)
 ir_domain_translator.rna_design(input,nussi_output)
 
 

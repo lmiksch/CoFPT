@@ -4,7 +4,7 @@ from functions import  path_generator
 from functions import convert_functions
 import argparse
 # -*- coding: utf-8 -*-
-"""This module was created to test the path_to_seq function.
+"""This module was created to test the path_to_seq function. 
 
 """
 
@@ -46,11 +46,9 @@ def check_paths(seq):
         pairtable_path = convert_functions.path_to_pairtablepath(path)
         calc_seq = path_to_seq.fold_to_seq(pairtable_path)
         print("Calculated Sequence = ",calc_seq)
-        conv_seq = convert_functions.convert_pts_out_to_nussi_in(calc_seq)
-    
-        calculated_sequences.append(conv_seq)
-        print("conv_seq",conv_seq)
-        nussinov_path = nussinov.nussinov_modules(conv_seq)
+        
+
+        nussinov_path = nussinov.nussinov_modules(calc_seq)
         if len(nussinov_path) != 1: 
             print("Warning: There are more than one optimal folding paths for this sequence. Reconsider your input")
         if nussinov_path[0] == path and len(nussinov_path) == 1:
