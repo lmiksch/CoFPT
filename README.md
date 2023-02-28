@@ -26,7 +26,7 @@ To use the scripts you need to clone the repository using git:
 $ git clone https://github.com/lmiksch/CoFPT
 
 #Change your directory 
-$ cd Software_Project
+$ cd CoFPT
 ```
 
 ## Using domain_seq_generator
