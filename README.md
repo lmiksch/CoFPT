@@ -97,7 +97,7 @@ It is recommended, to evalute the sequence using [DrTransformer](https://github.
 	$echo nucleotide_sequence| DrTransformer
 	```
 
-The resulting output of DrTransformer can then be analysed using the webbased tool [DrForna](https://github.com/ViennaRNA/drforna).
+The resulting output of DrTransformer can then be analysed using the webbased tool [DrForna](https://github.com/ViennaRNA/drforna) and with the dr_out_parser script
 
 
 
