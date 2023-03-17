@@ -293,7 +293,6 @@ def module_folding_path(structures,seq):
 		Returns: 
 			module_structure(list): 
 	"""
-	print(structures,seq)
 	modules = seq.split("l")
 	seq = convert(seq)
 	module_path = []
@@ -361,7 +360,7 @@ def get_domain_folds(structures,rna):
 def nussinov_modules(rna):
 	""" Takes rna sequence and applies our nussinov algorithm to it. 
 
-	Args: 
+	Args: module_fol
 		rna (str): domain level sequence with spaces
 
 	Returns: 
@@ -378,7 +377,7 @@ def nussinov_modules(rna):
 	
 	possible_paths = find_possible_structs(domain_folds)
 
-	return possible_paths
+	return possible_paths, nussi_output
 
 
 

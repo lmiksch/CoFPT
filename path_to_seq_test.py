@@ -71,10 +71,10 @@ def check_path(path):
     """Takes a dot-bracket notation path and calculates the domain level sequence and then checks with nussi if the calculated sequence is equal to the input sequence"""
     pairtable_path = convert_functions.path_to_pairtablepath(path)
     calc_seq = path_to_seq.fold_to_seq(pairtable_path)
-    conv_seq = convert_functions.convert_pts_out_to_nussi_in(calc_seq)
     
-    nussinov_path = nussinov(conv_seq)
-    calculated_path = module_folding_path(nussinov_path,convert(conv_seq))
+    nussinov_path = nussinov.nussinov(calc_seq)
+    converted_seq = convert_functions.convert_UL_list(calc_seq.split())
+    calculated_path = convert_functions.only_b_domainfp(converted_seq,nussinov_path)
     if calculated_path == path:
         print("works:",pairtable_path)
         print(calculated_path,"calculated from nussinov")
@@ -86,7 +86,7 @@ def check_path(path):
         print(calculated_path,"calculated from nussinov")
         print("calculated sequence:",calc_seq)
     
-check_paths(seq)
+check_path([".","()",".()"])
 
 
 #print(nussinov("ba*b*c*ecbadg*d*a*b*c*e*f*fecbadg"))

@@ -114,7 +114,7 @@ def convert_to_UL(string):
 
     counts = string.count("*")
     c_string = list(string)
-	
+    
     for x in range(1,len(c_string)):
         if string[x] == "*":
             c_string[x-1] = c_string[x-1].upper()
@@ -126,44 +126,75 @@ def convert_to_UL(string):
 
 
 def module_folding_path(structures,seq):
-	"""Takes output of nussinov algorithm and converts it just to the folding path of the b domain for comparison against the input path. 
-		It will only consider adding the strucure after a module has fully transcribed. 
+    """Takes output of nussinov algorithm and converts it just to the folding path of the b domain for comparison against the input path. 
+        It will only consider adding the strucure after a module has fully transcribed. 
 
-		Args: 
-			Structure(list): Output of nussinov algorithm 
-			seq(str): sequences which was used in the nussinov algorithm
-		
-		Returns: 
-			module_structure(list): 
-	"""
-	modules = seq.split("l")
-	seq = convert(seq)
-	module_path = []
+        Args: 
+            Structure(list): Output of nussinov algorithm 
+            seq(str): sequences which was used in the nussinov algorithm with space and star annotation
+        
+        Returns: 
+            module_structure(list): 
+    """
+    
+    modules = seq.split("l")
+    for x in range(len(modules)):
+        modules[x] = modules[x].split() 
+        
+    
+    seq = convert(seq)
+    module_path = []
+    
 
-	lengths = [0 for x in modules]
+    lengths = [0 for x in modules]
 
-	for x in range(len(modules)):
-		for z in range(x+1):
-			lengths[x] = len(modules[z]) + lengths[x] 
-	t = 1 
-	for x in range(len(seq)):
-		if seq[x] == "l":
-			lengths[t] += t 
-			t += 1
-
-	for x in range(len(lengths)):
-		module_path.append(structures[lengths[x]])
-	liste = [[] for x in module_path]
+    for x in range(len(modules)):
+        for z in range(x+1):
+            lengths[x] = len(modules[z]) + lengths[x] 
+    t = 1 
+    for x in range(len(seq)):
+        if seq[x] == "l":
+            lengths[t] += t 
+            t += 1
+    
 
 
-	for x in range(len(module_path)):
-		for z in range(len(module_path[x])):
-			if seq[z] == "b" or seq[z] == "B":
-				liste[x].append(module_path[x][z])
-		
-	for x in range(len(liste)):
-		liste[x] = "".join(liste[x])
-	return(liste)	  
+    for x in range(len(lengths)):
+        module_path.append(structures[lengths[x]])
+    liste = [[] for x in module_path]
+
+    print(module_path)
+    for x in range(len(module_path)):
+        for z in range(len(module_path[x])):
+            if seq[z] == "b" or seq[z] == "B":
+                liste[x].append(module_path[x][z])
+        
+    for x in range(len(liste)):
+        liste[x] = "".join(liste[x])
+    return(liste)	
+  
+def only_b_domainfp(seq,path):
+    """Takes a seq and the extended folding path only returns the folding path of only the b domains
+
+    Args: 
+        seq(list): sequence in form of a list where each entry in the list corresponds to one module
+        path(list): module folding path in form of a list where each entry corresponds to one module being transcribed
+
+    """
+    b_domainfp = [[] for x in path]
+
+    
+    for x in range(len(path)):
+
+        for y in range(len(path[x][0])):
+           
+            if seq[y] == "b" or seq[y] == "B":
+                
+                b_domainfp[x].append(path[x][0][y])
+
+    for x in range(len(b_domainfp)):
+        b_domainfp[x] = "".join(b_domainfp[x])
+    return b_domainfp
 
 def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
@@ -171,7 +202,13 @@ def d_length(domain):
     elif domain == "l":
         return 5
     return 3
-    
+def convert_UL_list(seq):
+    """takes a domain level sequence in form of a list and converts it into UL annotation
+    """    
+    for x in range(len(seq)):
+        if seq[x][-1] == "*":
+            seq[x] = seq[x][:-1].upper()
+    return seq
   
 def extended_domain_path(domain_path):
     """ Extends domain level path to the corresponding nt path but with domains: abc -> aaa bbbbb ccc
@@ -235,6 +272,36 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
 
     return nt_path
 
+
+
+def extended_fp_path(domain_path,domain_seq):
+    """ Extends domain level folding path to the corresponding dot-bracket path  
+
+    Args:
+        domain_path (list): sublist correspond to  path sequence
+    
+    Returns: 
+        full_path (list): extended path 
+
+    """
+
+    full_path = []
+   
+    domain_seq = convert_UL_list(domain_seq.split())        
+    
+    for z in range(len(domain_path)):
+        ext_path = []
+        for x in range(len(domain_path[z][0])):  
+            if domain_seq[x] != "l":
+                ext_path.append(domain_path[z][0][x] * d_length(domain_seq[x]))
+            else:
+                ext_path.append("." * d_length(domain_seq[x]))
+     
+            
+        full_path.append("".join(ext_path))
+
+    return full_path
+
 def UL_list(list):
     """ Converts a list of domains into UL list
     """
@@ -248,16 +315,33 @@ def UL_list(list):
 
     return(UL_liste)
 
+def convert(string):
+    """converts string in star annotation to UL_seq and keeps the spaces
+
+
+    """
+    counts = string.count("*")
+    c_string = list(string)
+    
+    for x in range(1,len(c_string)):
+        if string[x] == "*":
+            c_string[x-1] = c_string[x-1].upper()
+    for x in range(counts):		
+        c_string.remove("*")
+
+    c_string = "".join(c_string)
+    return c_string
 
 
 
 if __name__=="__main__":
-    print("convert_functions")
-    print(path_to_pairtablepath(['.', '()', '.()', '(())']))
+    #print("convert_functions")
+    #print(path_to_pairtablepath(['.', '()', '.()', '(())']))
     #get_module_fp_sequences("AAABBBBBCCCLLLCCCBBBBBAAALLLBBBBBBBBBB")
-    print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))
+    #print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))
 
-    print(UL_list("a aa* c av* a d e b b* bbb*".split()))
+    #print(UL_list("a aa* c av* a d e b b* bbb*".split()))
+    only_b_domainfp("b   l  A B C  l  c b a".split(),[['..'], ['(..)..'], ['..(((.)))']])
 
 
 

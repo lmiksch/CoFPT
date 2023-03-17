@@ -46,7 +46,9 @@ domain_seq = path_to_seq.fold_to_seq(input)
 print("Domain Seq:", domain_seq)
 
 #nussinov for calculting domain level folding path
-mfp = nussinov.nussinov_modules(domain_seq)
+mfp, dfp = nussinov.nussinov_modules(domain_seq)
+
+
 
 print("Calculated path from nussinov:",mfp)
 mfp = mfp[0]
@@ -73,6 +75,10 @@ with open("domain_seq_out.txt", "a") as output:
     output.write("\n\n")
     output.write("Calculated Path from Nussinov:\n")
     output.write(str(mfp))
+    output.write("\n\n")
+    output.write("Calculated domain level Path from Nussinov:\n")
+    output.write(str(dfp))
+    
 
 
 
