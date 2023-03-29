@@ -261,7 +261,7 @@ def constrained_efe(sequence,c):
 
 
 
-def rna_design(seq,path):
+def rna_design(seq,path,out):
     """
     Takes the calculated sequence(With space annotation) and the calulated nussinovpath as input and designs a RNA sequence
     
@@ -428,7 +428,7 @@ def rna_design(seq,path):
 
 
     #Output generation
-    f = open("IR_output.txt", "a")
+    f = open(str(out) + "_IR_out.txt", "a")
     print(" ")
     f.write("\n")
     f.write("\n")

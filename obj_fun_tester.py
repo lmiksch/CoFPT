@@ -4,12 +4,31 @@ from functions import convert_functions
 import argparse
 import subprocess
 import drt_out_parser 
+import csv 
 
-# -*- coding: utf-8 -*-
+""" Pipeline which takes the domain level sequence and translates it into nucleotide sequence. DrTransformer with nt sequence and the output gets evaluated by drt_out_parser. 
+
+    Input: 
+        -i domain_seq_out.txt
+"""
+
+
 """This module converts the domain level sequence into a nucleotide level sequence.
 
 """
-#input parsing prolly just from commandline a domain seq or input output file of domain_seq 
+
+#generate unique filename 
+
+with open("testing.tsv","r") as test:
+     lines = test.readlines()
+
+used_values = []
+for line in lines:
+    values = line.strip().split("\t")
+    used_values.append(values[0])
+
+current_index = int(used_values[-1]) + 1
+
 
 
 parser = argparse.ArgumentParser(
@@ -51,19 +70,12 @@ nussi_output = nussinov.nussinov(domain_seq)
 # Nussinov to get extended folding path 
 print("\n", "Running Translation")
 print(input)
-seq,obj_fun = ir_domain_translator.rna_design(input,nussi_output)
+seq,obj_fun = ir_domain_translator.rna_design(input,nussi_output,"testing/" + str(current_index))
 
-print("----------",seq)
-#seq = "CAAUGUUUCACCCUUUCAUUGAUGUCUACUAACUUCAUCAAUGAAAACCUUCCUCUUGGUUUUCAUUGAUGAAGCACAAAAACCGAGACAUCAAUGAAAGGGCACCCUGUGUGCCCUUUCAUUGAUGUCUCGGCCAGCGAGGUGCUUCAUCAAUGAAAACCAAGUCCUCUAUGGGCUUGGUUUUCAUUGAUGAAGCACUUC"
 
-command = "echo " + seq + "| DrTransformer --name test"
+command = "echo " + seq + "| DrTransformer --name " + str(current_index) + "_test"
 result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-
-# Print the output of the command
-# print(result.stdout.decode('utf-8'))
-
-# Check for any errors
 if result.stderr:
     print(result.stderr.decode('utf-8'))
 
@@ -72,7 +84,7 @@ domain_seq = input
 with open("domain_seq_out.txt") as f:
         path_out = [line.rstrip() for line in f]
 
-with open('test.drf') as f:
+with open(str(current_index) + '_test.drf') as f:
     dr_out= [line.rstrip().split() for line in f]
 
 
@@ -81,7 +93,10 @@ fp = eval(path_out[-1])
 
 pop,ext_fp = drt_out_parser.parse_drt_out(domain_seq,fp,dr_out)
 
-with open("obj_fun_test.out","a") as out: 
+
+avg_pop = round(sum(float(x) for x in pop)/len(pop),4)
+
+with open("testing/" + str(current_index) + "_test.out","a") as out: 
      out.write("Objecitve function \n")
      out.write(obj_fun)
      out.write("\n")
@@ -95,3 +110,8 @@ with open("obj_fun_test.out","a") as out:
         out.write("  ")
         out.write(ext_fp[x])
         out.write("\n")
+
+    #add current soltuions to tsv file 
+with open("testing.tsv", "a", newline="") as f:
+    writer = csv.writer(f, delimiter="\t")
+    writer.writerow([current_index, avg_pop, obj_fun])

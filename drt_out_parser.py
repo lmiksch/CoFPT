@@ -15,7 +15,8 @@ def parse_drt_out(domain_seq,fp,dr_out):
         if dr_out[x][3] == extended_fp[i]:
             populations.append(dr_out[x][2])
             i += 1
-
+        if i == len(extended_fp):
+            break
     if i != len(extended_fp): # if last structure is not matching add 0 to populations only occurs if optimization fails
             populations.append("0")
     print("Populations", "Structure")
