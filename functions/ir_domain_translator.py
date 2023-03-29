@@ -413,15 +413,16 @@ def rna_design(seq,path):
             global factor
             
             total += (abs(efe)- abs(fe)) + mse*0.00000001  + barrier*0.0001
-            
-            
+
+            global obj_fun
+            obj_fun = "(abs(efe)- abs(fe)) + mse*0.00000001  + barrier*0.0001" 
         return total
 
 
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 100, temp = 0.04)
 
 
 
@@ -477,6 +478,8 @@ def rna_design(seq,path):
     #output include all folding path structures so (),().,()(), with rnafold
     print(cv.extended_domain_path(UL_liste))
     f.write(cv.extended_domain_path(UL_liste))
+
+    return rna.ass_to_seq(best), obj_fun
   
 
 def split_ntseq_to_domainfp(nt_seq,domain_seq):
