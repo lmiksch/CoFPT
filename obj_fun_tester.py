@@ -70,7 +70,7 @@ nussi_output = nussinov.nussinov(domain_seq)
 # Nussinov to get extended folding path 
 print("\n", "Running Translation")
 print(input)
-seq,obj_fun = ir_domain_translator.rna_design(input,nussi_output,"testing/" + str(current_index))
+seq,score = ir_domain_translator.rna_design(input,nussi_output,"testing/" + str(current_index))
 
 
 command = "echo " + seq + "| DrTransformer --name " + str(current_index) + "_test"
@@ -95,23 +95,29 @@ pop,ext_fp = drt_out_parser.parse_drt_out(domain_seq,fp,dr_out)
 
 
 avg_pop = round(sum(float(x) for x in pop)/len(pop),4)
-
+s,obj_function = ir_domain_translator.objective_function(0,0,0,0)
 with open("testing/" + str(current_index) + "_test.out","a") as out: 
      out.write("Objecitve function \n")
-     out.write(obj_fun)
+     out.write(obj_function)
      out.write("\n")
      out.write("Sequence produced:\n")
      out.write(seq)
      out.write("\n")
 
-     out.write("Following populations were achieved: \n")
+     out.write("Following populations were achieved with an average population of:")
+     out.write(str(avg_pop))
+     out.write("\n")
      for x in range(len(ext_fp)):
         out.write(pop[x])
         out.write("  ")
         out.write(ext_fp[x])
         out.write("\n")
+     out.write("Score = ")
+     out.write(str(score))
+     out.write("\n")
+       
 
     #add current soltuions to tsv file 
 with open("testing.tsv", "a", newline="") as f:
     writer = csv.writer(f, delimiter="\t")
-    writer.writerow([current_index, avg_pop, obj_fun])
+    writer.writerow([current_index, avg_pop, obj_function,score])

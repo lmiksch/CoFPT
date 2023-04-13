@@ -6,6 +6,10 @@ from functions import nussinov
 import random
 import math
 
+def objective_function(fe,efe,mse,barrier):
+    obj_fun = "(abs(efe)- abs(fe))  + barrier*0.00001 "
+    score = eval(obj_fun.format(fe=fe,efe=efe,barrier=barrier))
+    return score,obj_fun
 
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
@@ -195,9 +199,9 @@ def current_scores(nt_seqfp,extended_fp,seq):
         else: 
             deltaE = 99
             barrier = 99
-     
-        E_1_fc = RNA.fold_compound(seq_path[0])
-        E_1 = E_1_fc.eval_structure(extended_fp[0].replace(".","x"))
+
+        E_1_fc = RNA.fold_compound(seq_path[x-1])
+        E_1 = E_1_fc.eval_structure(extended_fp[x-1].replace(".","x"))
        
 
         E_i_fc = RNA.fold_compound(seq_path[x])
@@ -213,7 +217,7 @@ def current_scores(nt_seqfp,extended_fp,seq):
         mse = (deltaE - (fe - E_1)/x)**2
         global factor
         
-        scores.append(abs(efe) -abs(fe) + mse*0.00000001  + barrier*0.0001)
+        scores.append(objective_function(fe,efe,mse,barrier))
         
         
     return scores
@@ -337,7 +341,7 @@ def rna_design(seq,path,out):
     
     
     #controlling gc content since adding energy will generate a gc bias
-    GCcont = -0.2 
+    GCcont = -0 
     gc_funs = [rna.GCCont(i) for i in range(seqlen)]
     model.add_functions(gc_funs, "gc")
     model.set_feature_weight(GCcont, "gc")
@@ -397,32 +401,34 @@ def rna_design(seq,path,out):
             
             E_1_fc = RNA.fold_compound(nt_path[0])
             E_1 = E_1_fc.eval_structure(extended_fp[0].replace(".","x"))
-            print
+            
 
             E_i_fc = RNA.fold_compound(nt_path[x])
             E_i = E_i_fc.eval_structure(extended_fp[x].replace(".","x"))
 
-            E_i1_fc = RNA.fold_compound(nt_path[x])
-            E_i1 = E_i1_fc.eval_structure(extended_fp[x].replace(".","x"))
+            E_i1_fc = RNA.fold_compound(nt_path[x-1])
+            E_i1 = E_i1_fc.eval_structure(extended_fp[x-1].replace(".","x"))
 
             deltaE = E_i - E_i1
 
 
             
-            mse = (deltaE - (fe - E_1)/x)**2
+            mse = (deltaE - (fe - E_i)/x)**2
             global factor
+            #print(barrier* 0.0000001)
+            obj_score = objective_function(fe,efe,mse,barrier)[0]
             
-            total += (abs(efe)- abs(fe)) + mse*0.00000001  + barrier*0.0001
+            total += obj_score
 
-            global obj_fun
-            obj_fun = "(abs(efe)- abs(fe)) + mse*0.00000001  + barrier*0.0001" 
+            
+            
         return total
 
 
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 100, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 1500, temp = 0.04)
 
 
 
@@ -470,7 +476,7 @@ def rna_design(seq,path,out):
         f.write("  Score: ")
         f.write(str(final_scores[i]))
         f.write(" \n")
-        print(" ")
+        print("")
         i += 1
     f.write(" \n")
     print("")
@@ -479,8 +485,7 @@ def rna_design(seq,path,out):
     print(cv.extended_domain_path(UL_liste))
     f.write(cv.extended_domain_path(UL_liste))
 
-    return rna.ass_to_seq(best), obj_fun
-  
+    return rna.ass_to_seq(best), best_val
 
 def split_ntseq_to_domainfp(nt_seq,domain_seq):
     """split_ntseq_to_domainfp converts the nucleotide output into a list with sublists where each sublist corresponds to the sequence at the respective transcription step 
