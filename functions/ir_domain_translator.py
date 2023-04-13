@@ -165,7 +165,7 @@ def add_folding_path_constraint(path,UL_seq,model):
 
 
 
-def current_scores(nt_seqfp,extended_fp,seq):
+def current_scores(nt_seqfp,extended_fp,seq,d_seq):
     """Calculates the final score of each sequence at each transcription step 
     
     """
@@ -215,9 +215,9 @@ def current_scores(nt_seqfp,extended_fp,seq):
 
         
         mse = (deltaE - (fe - E_1)/x)**2
-        global factor
         
-        scores.append(objective_function(fe,efe,mse,barrier))
+        
+        scores.append(objective_function(fe,efe,mse,barrier)[0])
         
         
     return scores
@@ -435,9 +435,6 @@ def rna_design(seq,path,out):
 
     #Output generation
     f = open(str(out) + "_IR_out.txt", "a")
-    print(" ")
-    f.write("\n")
-    f.write("\n")
     print("Calculated NT sequence:")
     f.write("Calculated NT sequence: \n")
     print(rna.ass_to_seq(best), -best_val)
@@ -455,7 +452,7 @@ def rna_design(seq,path,out):
 
     #Visualization
     
-    final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)))
+    final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
     
     i = 0
     print("\n")   
