@@ -117,8 +117,7 @@ def nussinov(rna):
 
 	structures = [[] for x in range(M+1)]
 
-	for x in dir_matrix:
-		print(x)
+	
 	module_indices = []
 		
 	for x in range(len(UL_liste)):
