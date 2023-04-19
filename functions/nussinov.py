@@ -47,11 +47,11 @@ def fill(nm, rna,dir_matrix):
 
 				if down == max_score and max_score != 0:
 					dir_matrix[i][j].append("d")
-				if left == max_score and max_score != 0:
+				elif left == max_score and max_score != 0:
 					dir_matrix[i][j].append("l")
-				if diag == max_score and max_score != 0 and couple((rna[i],rna[j])):
+				elif diag == max_score and max_score != 0 and couple((rna[i],rna[j])):
 					dir_matrix[i][j].append("di")
-				if rc == max_score and max_score != 0:
+				elif rc == max_score and max_score != 0:
 					
 					dir_matrix[i][j].append(pointer_t)
 
@@ -117,7 +117,8 @@ def nussinov(rna):
 
 	structures = [[] for x in range(M+1)]
 
-	
+	for x in dir_matrix:
+		print(x)
 	module_indices = []
 		
 	for x in range(len(UL_liste)):
@@ -187,6 +188,7 @@ def traceback(dir_matrix, rna, fold, i, L,folds,nm):
 	global f_pointer
 	global check_rc 
 	global number_pairs
+	
 	if i < j: 
 		for x in range(len(dir_matrix[i][j])):
 			
