@@ -47,11 +47,11 @@ def fill(nm, rna,dir_matrix):
 
 				if down == max_score and max_score != 0:
 					dir_matrix[i][j].append("d")
-				if left == max_score and max_score != 0:
+				elif left == max_score and max_score != 0:
 					dir_matrix[i][j].append("l")
-				if diag == max_score and max_score != 0 and couple((rna[i],rna[j])):
+				elif diag == max_score and max_score != 0 and couple((rna[i],rna[j])):
 					dir_matrix[i][j].append("di")
-				if rc == max_score and max_score != 0:
+				elif rc == max_score and max_score != 0:
 					
 					dir_matrix[i][j].append(pointer_t)
 

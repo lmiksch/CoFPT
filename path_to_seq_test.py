@@ -86,7 +86,7 @@ def check_path(path):
         print(calculated_path,"calculated from nussinov")
         print("calculated sequence:",calc_seq)
     
-check_path([".","()",".()"])
+check_paths(seq)
 
 
 #print(nussinov("ba*b*c*ecbadg*d*a*b*c*e*f*fecbadg"))
