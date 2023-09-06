@@ -74,11 +74,11 @@ Input:
 
 * Using the output file of domain_seq_generator.py 
 	```bash
-	$ python3 ir_domain_translator -i domain_seq_out.txt
+	$ python3 domain_translator.py -i domain_seq_out.txt
 	```
 * Using the command line to input a domain level sequence
 	```bash 
-	$ python3 ir_domain_translator
+	$ python3 domain_translator.py
 	>Input here a domain level sequence: 
 	```
 
