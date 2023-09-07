@@ -7,7 +7,7 @@ import random
 import math
 
 def objective_function(fe,efe,mse,barrier):
-    obj_fun = "(abs(efe)- abs(fe))  + barrier*0.00001 "
+    obj_fun = "(fe - efe)  + barrier*0.00001 "
     score = eval(obj_fun.format(fe=fe,efe=efe,barrier=barrier))
     return score,obj_fun
 
@@ -415,6 +415,12 @@ def rna_design(seq,path,out):
             
             mse = (deltaE - (fe - E_i)/x)**2
             global factor
+
+
+            #print("fe", fe)
+
+
+            #print("efe",efe)
             #print(barrier* 0.0000001)
             obj_score = objective_function(fe,efe,mse,barrier)[0]
             

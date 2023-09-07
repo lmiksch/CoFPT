@@ -48,7 +48,7 @@ nussi_output = nussinov.nussinov(domain_seq)
 # Nussinov to get extended folding path 
 print("\n", "Running Translation")
 print(input)
-ir_domain_translator.rna_design(input,nussi_output)
+ir_domain_translator.rna_design(input,nussi_output,"test")
 
 
 
