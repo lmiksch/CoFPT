@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import drt_out_parser 
 import csv 
+import os
 
 """ Pipeline which takes the domain level sequence and translates it into nucleotide sequence. DrTransformer with nt sequence and the output gets evaluated by drt_out_parser. 
 
@@ -17,18 +18,26 @@ import csv
 
 """
 
-#generate unique filename 
+#generates files and folder structure 
+try: 
+    with open("testing.tsv","r") as test:
+        lines = test.readlines()
+    used_values = []
+    for line in lines:
+        values = line.strip().split("\t")
+        used_values.append(values[0])
 
-with open("testing.tsv","r") as test:
-     lines = test.readlines()
+    current_index = int(used_values[-1]) + 1
 
-used_values = []
-for line in lines:
-    values = line.strip().split("\t")
-    used_values.append(values[0])
+except: 
+    with open('testing.tsv', "w") as file:
+        file.write("index\taverage_pop\tobjective_function\tscore\n")
+        
 
-current_index = int(used_values[-1]) + 1
+    current_index = 0
 
+if not os.path.exists("testing"):
+     os.makedirs("testing")
 
 
 parser = argparse.ArgumentParser(
@@ -94,6 +103,7 @@ fp = eval(path_out[-1])
 pop,ext_fp = drt_out_parser.parse_drt_out(domain_seq,fp,dr_out)
 
 
+
 avg_pop = round(sum(float(x) for x in pop)/len(pop),4)
 s,obj_function = ir_domain_translator.objective_function(0,0,0,0)
 with open("testing/" + str(current_index) + "_test.out","a") as out: 
@@ -115,9 +125,9 @@ with open("testing/" + str(current_index) + "_test.out","a") as out:
      out.write("Score = ")
      out.write(str(score))
      out.write("\n")
-       
+           
 
-    #add current soltuions to tsv file 
+#add current solutions to tsv file 
 with open("testing.tsv", "a", newline="") as f:
     writer = csv.writer(f, delimiter="\t")
     writer.writerow([current_index, avg_pop, obj_function,score])

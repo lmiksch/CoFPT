@@ -7,7 +7,11 @@ import random
 import math
 
 def objective_function(fe,efe,mse,barrier):
-    obj_fun = "(fe - efe)  + barrier*0.00001 "
+    """
+    Function exists to only change one thing when changing the obj function
+    """
+
+    obj_fun = "(fe - efe)**2 + barrier*0.00001"
     score = eval(obj_fun.format(fe=fe,efe=efe,barrier=barrier))
     return score,obj_fun
 
@@ -38,7 +42,7 @@ def d_length(domain):
 def identical_domains_constraint(domain,UL_seq,model):
     """Identical_domains_constraint
 
-    Applies the constaint to our model, that the value of indices of the same domain must be equal.
+    Applies the constraint to our model, that the value of indices of the same domain must be equal.
 
     Args:
         domain: domain name
@@ -190,7 +194,7 @@ def current_scores(nt_seqfp,extended_fp,seq,d_seq):
         
         fe = fc.eval_structure(extended_fp[x].replace(".","x"))
         
-        mypath, barrier = call_findpath(seq_path[x],ss1,extended_fp[x],0,30,mxb=30)
+        mypath, barrier = call_findpath(seq_path[x],ss1,extended_fp[x],0,30)
         
         
         #print(mypath)
@@ -199,6 +203,7 @@ def current_scores(nt_seqfp,extended_fp,seq,d_seq):
         else: 
             deltaE = 99
             barrier = 99
+            
 
         E_1_fc = RNA.fold_compound(seq_path[x-1])
         E_1 = E_1_fc.eval_structure(extended_fp[x-1].replace(".","x"))
@@ -215,8 +220,12 @@ def current_scores(nt_seqfp,extended_fp,seq,d_seq):
 
         
         mse = (deltaE - (fe - E_1)/x)**2
-        
-        
+        """
+        print("fe",fe)
+        print("efe",efe)
+        print("barrier",barrier)
+        """
+
         scores.append(objective_function(fe,efe,mse,barrier)[0])
         
         
@@ -388,14 +397,13 @@ def rna_design(seq,path,out):
             fc = RNA.fold_compound(nt_path[x])
             
             fe = fc.eval_structure(extended_fp[x].replace(".","x"))
-            mypath, barrier = call_findpath(nt_path[x],ss1,extended_fp[x],0,10,mxb=10)
+            mypath, barrier = call_findpath(nt_path[x],ss1,extended_fp[x],0,30)
 
            
             if mypath != None:
                 deltaE = abs(mypath[-1][1]) - abs(mypath[0][1])
                 
             else: 
-              
                 deltaE = 99
                 barrier = 99
             
@@ -417,14 +425,15 @@ def rna_design(seq,path,out):
             global factor
 
 
-            #print("fe", fe)
+            print("fe", fe)
 
 
-            #print("efe",efe)
-            #print(barrier* 0.0000001)
+            
+            print("efe",efe)
+            print("barrier",barrier)
             obj_score = objective_function(fe,efe,mse,barrier)[0]
             
-            total += obj_score
+            total += obj_score * x 
 
             
             
@@ -434,11 +443,11 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 1500, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
 
 
 
-
+    print("\n")#
     #Output generation
     f = open(str(out) + "_IR_out.txt", "a")
     print("Calculated NT sequence:")
@@ -458,8 +467,9 @@ def rna_design(seq,path,out):
 
     #Visualization
     
-    final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
     
+    final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
+    print("error 1")
     i = 0
     print("\n")   
     f.write(seq)
@@ -487,7 +497,7 @@ def rna_design(seq,path,out):
     #output include all folding path structures so (),().,()(), with rnafold
     print(cv.extended_domain_path(UL_liste))
     f.write(cv.extended_domain_path(UL_liste))
-
+    
     return rna.ass_to_seq(best), best_val
 
 def split_ntseq_to_domainfp(nt_seq,domain_seq):
