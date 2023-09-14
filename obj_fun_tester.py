@@ -1,6 +1,6 @@
 from functions import ir_domain_translator
 from functions import nussinov
-from functions import convert_functions
+from functions import convert_functions as cv
 import argparse
 import subprocess
 import drt_out_parser 
@@ -89,8 +89,7 @@ result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subp
 if result.stderr:
     print(result.stderr.decode('utf-8'))
 
-domain_seq = input 
-
+domain_seq = cv.differnt_l_domains(input) 
 with open("domain_seq_out.txt") as f:
         path_out = [line.rstrip() for line in f]
 

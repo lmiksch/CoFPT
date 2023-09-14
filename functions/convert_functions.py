@@ -199,9 +199,11 @@ def only_b_domainfp(seq,path):
 def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
         return 5
-    elif domain == "l":
-        return 5
-    return 3
+    elif domain[0] == "l":
+        return round(int(domain[1])*1.5) + 5
+    return 3 
+
+
 def convert_UL_list(seq):
     """takes a domain level sequence in form of a list and converts it into UL annotation
     """    
@@ -222,13 +224,10 @@ def extended_domain_path(domain_path):
     """
 
     
-
-    UL_domain_path = convert_to_UL(domain_path)
+    UL_domain_path = convert_UL_list(domain_path)
     full_path = []
         
-            
     for z in range(len(UL_domain_path)):
-        
         full_path.append(UL_domain_path[z] * d_length(UL_domain_path[z]))
             
 
@@ -292,16 +291,16 @@ def extended_fp_path(domain_path,domain_seq):
     """
 
     full_path = []
-   
-    domain_seq = convert_UL_list(domain_seq.split())        
+
+    domain_seq = convert_UL_list(domain_seq.split()) 
     
     for z in range(len(domain_path)):
         ext_path = []
         for x in range(len(domain_path[z][0])):  
-            if domain_seq[x] != "l":
+            #if domain_seq[x] != "l":
                 ext_path.append(domain_path[z][0][x] * d_length(domain_seq[x]))
-            else:
-                ext_path.append("." * d_length(domain_seq[x]))
+           # else:
+               # ext_path.append("." * d_length(domain_seq[x]))
      
             
         full_path.append("".join(ext_path))
@@ -339,15 +338,28 @@ def convert(string):
     return c_string
 
 
+def differnt_l_domains(domain_seq):
+    
+    split_seq = domain_seq.split()
+
+    count = 0
+    
+    for x,domain in enumerate(split_seq):
+        
+        if domain == "l":
+            split_seq[x] = "l" + str(count)
+            count += 1 
+        
+    return " ".join(split_seq)
 
 if __name__=="__main__":
+
     #print("convert_functions")
     #print(path_to_pairtablepath(['.', '()', '.()', '(())']))
     #get_module_fp_sequences("AAABBBBBCCCLLLCCCBBBBBAAALLLBBBBBBBBBB")
     #print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))
 
     #print(UL_list("a aa* c av* a d e b b* bbb*".split()))
-    only_b_domainfp("b   l  A B C  l  c b a".split(),[['..'], ['(..)..'], ['..(((.)))']])
-
-
-
+    #only_b_domainfp("b   l  A B C  l  c b a".split(),[['..'], ['(..)..'], ['..(((.)))']])
+    print(differnt_l_domains("l l l l l l l l l l"))
+    

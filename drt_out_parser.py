@@ -4,8 +4,6 @@ import argparse
 def parse_drt_out(domain_seq,fp,dr_out):
     #write function which extends fp for comparison to drt output
     extended_fp = cv.extended_fp_path(fp,domain_seq)
-    print(domain_seq,fp)
-    print(extended_fp)
     populations = []
     i = 0
     for x in range(1,len(dr_out)):

@@ -31,13 +31,13 @@ def identicaldomains(x):
 
 
 
-#could be changed to have custom input for the different domains
-def d_length(domain):
+#could be changed to have custom input for the different domains domain length now defined in functions/convert_functions
+"""def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
         return 5
-    elif domain == "l":
-        return 5
-    return 3
+    elif domain[0] == "l":
+        return round(domain[1]*1.5) + 5
+    return 3 """
 
 def identical_domains_constraint(domain,UL_seq,model):
     """Identical_domains_constraint
@@ -57,7 +57,7 @@ def identical_domains_constraint(domain,UL_seq,model):
 
             for u in UL_seq[:x]:
                 
-                i_pointer += d_length(u)
+                i_pointer += cv.d_length(u)
 
             j_pointer = i_pointer    
 
@@ -68,12 +68,12 @@ def identical_domains_constraint(domain,UL_seq,model):
                 if UL_seq[q] == domain and j_pointer != i_pointer:
                    
                     break
-                j_pointer += d_length(UL_seq[q])
+                j_pointer += cv.d_length(UL_seq[q])
 
         
             if i_pointer > j_pointer:
                 return
-            for z in range(d_length(domain)):
+            for z in range(cv.d_length(domain)):
                 if i_pointer != j_pointer:
                     
                     model.add_constraints(IdenticalDomains(i_pointer,j_pointer))
@@ -106,10 +106,10 @@ def domain_path_to_nt_path(path,UL_seq):
         
         for z in range(len(path[x][0])):
        
-            ext_path[x].append(path[x][0][z] * d_length(UL_seq[z]))
+            ext_path[x].append(path[x][0][z] * cv.d_length(UL_seq[z]))
         ext_path[x] = "".join(ext_path[x])
 
-
+    
     return ext_path
 
 def call_findpath(seq, ss1, ss2, md, fpw, mxb = float('inf')):
@@ -284,6 +284,7 @@ def rna_design(seq,path,out):
 
 
     """
+    seq = cv.differnt_l_domains(seq)
     print("Given sequence: ",seq)
     print("Given path: ",path)
     split_seq = seq.split()
@@ -308,7 +309,7 @@ def rna_design(seq,path,out):
 
     #calculates Sequence length
     for x in range(len(UL_liste)):
-        seqlen += d_length(UL_liste[x])
+        seqlen += cv.d_length(UL_liste[x])
        
 
     print("Running Calculations")
@@ -369,7 +370,7 @@ def rna_design(seq,path,out):
         #creates a list of list where each sublist i corresponds to the sequence at transcription step i 
         l_pointer = 0
         for z in split_seq:
-            r_pointer = l_pointer + d_length(z)
+            r_pointer = l_pointer + cv.d_length(z)
             
             split_nt_sequence.append(sequence[l_pointer:r_pointer])
             l_pointer = r_pointer
@@ -377,16 +378,16 @@ def rna_design(seq,path,out):
         
         nt_path = []
 
-        for  x in range(len(UL_liste)):
-            if UL_liste[x] == "l":
+        for x in range(len(UL_liste)):
+            if UL_liste[x][0] == "l":
             
                 
                 nt_path.append("".join(split_nt_sequence[:x+1]))
         nt_path.append(sequence)
         
 
-        total = []
-        
+        total = 0
+        #print(nt_path)
         for x in range(1,len(extended_fp)):
 
             #prepare input for finpath 
@@ -480,7 +481,6 @@ def rna_design(seq,path,out):
     
     
     final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
-    print("error 1")
     i = 0
     print("\n")   
     f.write(seq)
@@ -503,10 +503,10 @@ def rna_design(seq,path,out):
         print("")
         i += 1
     f.write(" \n")
-    print("")
-        
+
+    print("\n")
     #output include all folding path structures so (),().,()(), with rnafold
-    print(cv.extended_domain_path(UL_liste))
+    #print(cv.extended_domain_path(UL_liste))
     f.write(cv.extended_domain_path(UL_liste))
     
     return rna.ass_to_seq(best), best_val
@@ -530,7 +530,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
         
     l_pointer = 0
     for z in split_seq:
-        r_pointer = l_pointer + d_length(z)
+        r_pointer = l_pointer + cv.d_length(z)
             
         split_nt_sequence.append(nt_seq[l_pointer:r_pointer])
         l_pointer = r_pointer
@@ -540,7 +540,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
     nt_path = []
 
     for  x in range(len(UL_list)):
-        if UL_list[x] == "l":
+        if UL_list[x][0] == "l":
                 
             nt_path.append("".join(split_nt_sequence[:x+1]))
     nt_path.append(nt_seq)
