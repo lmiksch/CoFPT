@@ -273,6 +273,12 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
     return nt_path
 
 
+def is_star_pair(a,b):
+    """Checks if two domain pair in Star Annotation"""
+    if a[0] == b[0]:
+        if len(a) < len(b) or len(a) > len(b):
+            return True
+        
 
 def extended_fp_path(domain_path,domain_seq):
     """ Extends domain level folding path to the corresponding dot-bracket path  

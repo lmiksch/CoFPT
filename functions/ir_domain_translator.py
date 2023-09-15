@@ -37,7 +37,7 @@ def d_length(domain):
         return 5
     elif domain == "l":
         return 5
-    return 3 
+    return 3
 
 def identical_domains_constraint(domain,UL_seq,model):
     """Identical_domains_constraint
@@ -385,7 +385,7 @@ def rna_design(seq,path,out):
         nt_path.append(sequence)
         
 
-        total = 0
+        total = []
         
         for x in range(1,len(extended_fp)):
 
@@ -425,25 +425,36 @@ def rna_design(seq,path,out):
             global factor
 
 
-            print("fe", fe)
+            #print("fe", fe)
 
 
             
-            print("efe",efe)
-            print("barrier",barrier)
+            #print("efe",efe)
+            #print("barrier",barrier)
             obj_score = objective_function(fe,efe,mse,barrier)[0]
             
-            total += obj_score * x 
+            total.append(obj_score) 
 
-            
-            
-        return total
+        
+        #calculate MSE of scores to keep all scores equal 
+
+
+        total_mean = sum(total)/ len(total)
+
+        squared_error = [(x - total_mean) ** 2 for x in total]
+        #print("total after", total)   
+        for i,score in enumerate(total):
+            total[i] = score + squared_error[i]
+
+
+        #print("total after", total)    
+        return sum(total)
 
 
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 3000, temp = 0.04)
 
 
 

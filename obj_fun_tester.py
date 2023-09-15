@@ -44,7 +44,7 @@ parser = argparse.ArgumentParser(
                     prog = 'domain_translator',
                     description = 'Translates a domain level sequence into a nucleotide sequence.',
                 )
-
+Score: 0.010120898979605176 
 parser.add_argument("-i", metavar = "input ",  help="Input must be the output of doman_seq_generator otherwise a domain level seq needs to be specified.",type = str)
 
 
@@ -74,6 +74,7 @@ domain_seq = input
 print("Calculating nussinov")
 nussi_output = nussinov.nussinov(domain_seq)
 
+print(nussi_output)
 
 
 # Nussinov to get extended folding path 
