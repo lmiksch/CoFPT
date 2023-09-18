@@ -44,7 +44,7 @@ parser = argparse.ArgumentParser(
                     prog = 'domain_translator',
                     description = 'Translates a domain level sequence into a nucleotide sequence.',
                 )
-Score: 0.010120898979605176 
+
 parser.add_argument("-i", metavar = "input ",  help="Input must be the output of doman_seq_generator otherwise a domain level seq needs to be specified.",type = str)
 
 
@@ -107,7 +107,7 @@ pop,ext_fp = drt_out_parser.parse_drt_out(domain_seq,fp,dr_out)
 avg_pop = round(sum(float(x) for x in pop)/len(pop),4)
 s,obj_function = ir_domain_translator.objective_function(0,0,0,0)
 with open("testing/" + str(current_index) + "_test.out","a") as out: 
-     out.write("Objecitve function \n")
+     out.write("Objective function \n")
      out.write(obj_function)
      out.write("\n")
      out.write("Sequence produced:\n")

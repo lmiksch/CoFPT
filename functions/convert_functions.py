@@ -200,7 +200,7 @@ def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
         return 5
     elif domain[0] == "l":
-        return round(int(domain[1])*1.5) + 5
+        return round(int(domain[1])) + 5
     return 3 
 
 
@@ -246,9 +246,6 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
             nt_path (list): list where each sublist corresponds to sequence at transcription step
     
     """
-    print("ntseq to domainpath start")
-    print(nt_seq)
-    print(domain_seq)
 
     split_seq = domain_seq.split()
         
@@ -357,7 +354,7 @@ def differnt_l_domains(domain_seq):
 
 if __name__=="__main__":
 
-    #print("convert_functions")
+    #print("convert_functions")bbbbbl0l0l0l0l0FFFAAABBBBBCCCGGGl1l1l1l1l1l1l1dddcccbbbbbaaaeeel2l2l2l2l2l2l2l2EEEAAABBBBBCCCDDDl3l3l3l3l3l3l3l3l3hhhgggcccbbbbbaaafffiiil4l4l4l4l4l4l4l4l4l4lIIIFFFAAABBBBBCCCGGGHHH
     #print(path_to_pairtablepath(['.', '()', '.()', '(())']))
     #get_module_fp_sequences("AAABBBBBCCCLLLCCCBBBBBAAALLLBBBBBBBBBB")
     #print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))

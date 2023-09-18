@@ -1,5 +1,6 @@
 from functions import ir_domain_translator
 import argparse
+import RNA as RNA 
 """This function is designed to check the score of previously generated nt seq against the current implementation of the objective function
 """
 
@@ -42,6 +43,80 @@ print(extended_fp)
 
 
 
-scores = ir_domain_translator.current_scores(nt_seqfp,extended_fp,nt_seq,d_seq)
+#scores = ir_domain_translator.rstd_objective(nt_seq,True)
 
-print(sum(scores))
+def score_info(sequence):   
+        """print("Domain Seq from input file: ",input[3])
+    input = input[3]
+        split_nt_sequence = []
+        #creates a list of list where each sublist i corresponds to the sequence at transcription step i 
+        l_pointer = 0
+        for z in split_seq:
+            r_pointer = l_pointer + cv.d_length(z)
+            
+            split_nt_sequence.append(sequence[l_pointer:r_pointer])
+            l_pointer = r_pointer
+        
+        
+        nt_path = []
+
+        for x in range(len(UL_liste)):
+            if UL_liste[x][0] == "l":
+            
+                
+                nt_path.append("".join(split_nt_sequence[:x+1]))
+        nt_path.append(sequence)
+        """
+        nt_path = nt_seqfp
+        total = []
+        
+        for x in range(1,len(extended_fp)):
+
+            #prepare input for finpath 
+            
+            ss1 = extended_fp[x-1] + ("." * (len(nt_path[x])-len(nt_path[x-1])))
+         
+            efe = ir_domain_translator.constrained_efe(nt_path[x],extended_fp[x])
+            fc = RNA.fold_compound(nt_path[x])
+            
+            fe = fc.eval_structure(extended_fp[x].replace(".","x"))
+            mypath, barrier = ir_domain_translator.call_findpath(nt_path[x],ss1,extended_fp[x],0,30)
+
+           
+            if mypath != None:
+                deltaE = abs(mypath[-1][1]) - abs(mypath[0][1])
+                
+            else: 
+                deltaE = 99
+                barrier = 99
+
+    
+            mse = 0
+            global factor
+            print("\n")
+            print(extended_fp[x])
+            print("fe", fe)
+            print("efe",efe)
+            print("barrier",barrier)
+            obj_score = ir_domain_translator.objective_function(fe,efe,mse,barrier)[0]
+            
+            total.append(obj_score) 
+
+        
+        #calculate MSE of scores to keep all scores equal 
+
+
+        total_mean = sum(total)/ len(total)
+
+        squared_error = [(x - total_mean) ** 2 for x in total]
+        #print("total after", total)   
+        for i,score in enumerate(total):
+            total[i] = score + squared_error[i]
+        print("\n Squared deviations from mean")    
+        print(squared_error)
+
+        #print("total after", total)    
+        return total
+
+print("single scores")
+print(score_info(nt_seq))
