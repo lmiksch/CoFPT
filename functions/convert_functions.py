@@ -246,6 +246,9 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
             nt_path (list): list where each sublist corresponds to sequence at transcription step
     
     """
+    print("ntseq to domainpath start")
+    print(nt_seq)
+    print(domain_seq)
 
     split_seq = domain_seq.split()
         
@@ -264,7 +267,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
     nt_path = []
 
     for  x in range(len(UL_seq)):
-        if UL_seq[x] == "l":
+        if UL_seq[x][0] == "l":
                 
             nt_path.append("".join(split_nt_sequence[:x+1]))
     nt_path.append(nt_seq)

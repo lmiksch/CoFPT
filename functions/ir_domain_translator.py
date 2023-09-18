@@ -168,11 +168,11 @@ def add_folding_path_constraint(path,UL_seq,model):
 
 
 
-
+"""
 def current_scores(nt_seqfp,extended_fp,seq,d_seq):
-    """Calculates the final score of each sequence at each transcription step 
+    Calculates the final score of each sequence at each transcription step 
     
-    """
+    
     seq_path = cv.split_ntseq_to_domainfp(seq,d_seq)
     
     scores = [0,]
@@ -203,8 +203,8 @@ def current_scores(nt_seqfp,extended_fp,seq,d_seq):
         else: 
             deltaE = 99
             barrier = 99
-            
 
+        
         E_1_fc = RNA.fold_compound(seq_path[x-1])
         E_1 = E_1_fc.eval_structure(extended_fp[x-1].replace(".","x"))
        
@@ -220,17 +220,17 @@ def current_scores(nt_seqfp,extended_fp,seq,d_seq):
 
         
         mse = (deltaE - (fe - E_1)/x)**2
-        """
+        
         print("fe",fe)
         print("efe",efe)
         print("barrier",barrier)
-        """
+        
 
         scores.append(objective_function(fe,efe,mse,barrier)[0])
         
         
     return scores
-        
+"""      
 
 
 
@@ -316,9 +316,6 @@ def rna_design(seq,path,out):
     model = ir.Model(seqlen,4)
 
 
-    
-
-    
     add_folding_path_constraint(path,UL_liste,model)
 
 
@@ -330,9 +327,6 @@ def rna_design(seq,path,out):
             identical_domains_constraint(domain,UL_liste,model)
 
 
-
-
-    
     #optimization
 
     extended_fp = domain_path_to_nt_path(path,UL_liste)
@@ -362,11 +356,9 @@ def rna_design(seq,path,out):
 
 
 
-    def rstd_objective(sequence):
+    def rstd_objective(sequence,score_list = False):
     
         split_nt_sequence = []
-        
-        
         #creates a list of list where each sublist i corresponds to the sequence at transcription step i 
         l_pointer = 0
         for z in split_seq:
@@ -386,7 +378,7 @@ def rna_design(seq,path,out):
         nt_path.append(sequence)
         
 
-        total = 0
+        total = []
         #print(nt_path)
         for x in range(1,len(extended_fp)):
 
@@ -407,7 +399,8 @@ def rna_design(seq,path,out):
             else: 
                 deltaE = 99
                 barrier = 99
-            
+
+            """ 
             E_1_fc = RNA.fold_compound(nt_path[0])
             E_1 = E_1_fc.eval_structure(extended_fp[0].replace(".","x"))
             
@@ -419,10 +412,8 @@ def rna_design(seq,path,out):
             E_i1 = E_i1_fc.eval_structure(extended_fp[x-1].replace(".","x"))
 
             deltaE = E_i - E_i1
-
-
-            
-            mse = (deltaE - (fe - E_i)/x)**2
+            mse = (deltaE - (fe - E_i)/x)**2"""
+            mse = 0
             global factor
 
 
@@ -447,6 +438,8 @@ def rna_design(seq,path,out):
         for i,score in enumerate(total):
             total[i] = score + squared_error[i]
 
+        if score_list:
+            return total
 
         #print("total after", total)    
         return sum(total)
@@ -455,7 +448,7 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 3000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 1, temp = 0.04)
 
 
 
@@ -474,13 +467,16 @@ def rna_design(seq,path,out):
     f.write("Length = ")
     f.write(str(len(rna.ass_to_seq(best))))
     f.write(" \n")
-    ntseq_fp = cv.split_ntseq_to_domainfp(rna.ass_to_seq(best),d_seq)
 
+    ntseq_fp = cv.split_ntseq_to_domainfp(rna.ass_to_seq(best),d_seq)
+    print("Ntseq fp : ", ntseq_fp)
 
     #Visualization
     
     
-    final_scores = current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
+    final_scores = rstd_objective(str(rna.ass_to_seq(best)),score_list=True)   #current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
+    
+    final_scores.insert(0,0)
     i = 0
     print("\n")   
     f.write(seq)
@@ -489,7 +485,7 @@ def rna_design(seq,path,out):
     print("Resulting Module Folding Path with calculated structure using RNAfold")   
     f.write("Resulting Module Folding Path with calculated structure using RNAfold") 
     f.write(" \n")
-    for z in ntseq_fp:
+    for i,z in enumerate(ntseq_fp):
         fc = RNA.fold_compound(z)
         (mfe_struct, mfe) = fc.mfe()
         print(z)
@@ -501,7 +497,6 @@ def rna_design(seq,path,out):
         f.write(str(final_scores[i]))
         f.write(" \n")
         print("")
-        i += 1
     f.write(" \n")
 
     print("\n")
@@ -544,7 +539,6 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
                 
             nt_path.append("".join(split_nt_sequence[:x+1]))
     nt_path.append(nt_seq)
-
     return nt_path
 
 
