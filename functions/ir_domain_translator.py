@@ -319,11 +319,10 @@ def rna_design(seq,path,out):
     #addition of energy to our model 
     
     for x in extended_fp: 
+            print(x)
             ss = rna.parse(x)
             model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
         for (i,j) in ss], 'energy')
-
-
     
             model.add_feature('Energy', 'energy',
              lambda sample, target=x:
@@ -426,7 +425,7 @@ def rna_design(seq,path,out):
         squared_error = [(x - total_mean) ** 2 for x in total]
         #print("total after", total)   
         for i,score in enumerate(total):
-            total[i] = score + squared_error[i]
+            total[i] = score + squared_error[i]*0.5
 
         if score_list:
             return total
@@ -438,7 +437,7 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 10000, temp = 0.04)
 
 
 
