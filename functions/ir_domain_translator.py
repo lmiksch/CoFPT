@@ -280,13 +280,13 @@ def rna_design(seq,path,out):
     UL_liste = cv.UL_list(split_seq)
 
     #identicaldomains(True)
-
+    """
     ir.def_constraint_class(
             "IdenticalDomains",
             lambda i,j: [i,j],
             lambda x,y: x == y,
             module  = __name__ 
-        )
+        )"""
 
     
 
@@ -304,10 +304,10 @@ def rna_design(seq,path,out):
 
     #applies constraint, that same domains should have the same sequence
     unique_domains = "".join(set(UL_liste))
-    for domain in  unique_domains:
+    #for domain in  unique_domains:
 
-        if domain != "l":
-            identical_domains_constraint(domain,UL_liste,model)
+     #   if domain != "l":
+      #      identical_domains_constraint(domain,UL_liste,model)
 
 
     #optimization
@@ -425,7 +425,7 @@ def rna_design(seq,path,out):
         squared_error = [(x - total_mean) ** 2 for x in total]
         #print("total after", total)   
         for i,score in enumerate(total):
-            total[i] = score + squared_error[i]*0.5
+            total[i] = score + squared_error[i]
 
         if score_list:
             return total
@@ -437,7 +437,7 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 10000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 4000, temp = 0.04)
 
 
 

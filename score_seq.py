@@ -38,6 +38,7 @@ print(nt_seq)
 print(steps)
 print(nt_seqfp)
 print(extended_fp)
+print(" ")
 
 
 
@@ -69,9 +70,9 @@ def score_info(sequence):
         """
         nt_path = nt_seqfp
         total = []
-        
+        print("extended fp",extended_fp)
         for x in range(1,len(extended_fp)):
-
+            
             #prepare input for finpath 
             
             ss1 = extended_fp[x-1] + ("." * (len(nt_path[x])-len(nt_path[x-1])))
