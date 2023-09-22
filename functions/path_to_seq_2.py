@@ -39,11 +39,8 @@ def pairtable_to_path(pairtable):
     return path
     
 
-def fold_to_seq(path):
-    """ Main function of fold_to_seq.
-
-    Agrs:
-        path (list): A list of the desired folding path using the pairtable annotation 
+def fold_to_seq(fp_length):
+    """ Main function of fold_to_seq.globals()["block%s" % x].suffix = ""n 
 
     Return:
         new_string (str): A string of domains which should follow the given folding path. 
@@ -60,11 +57,13 @@ def fold_to_seq(path):
     #creates a list with the corresponding number of blocks  used in the folding path 
     seq = []
     used_domains = ["b"]
+    path = [[] for x in range(fp_length)]
+    path[-1].append(fp_length)
     for x in range(1, path[-1][0] + 1):
         
         globals()["block%s" %  x] = module("b","","",False)
-    
-        
+        globals()["block%s" % x].praefix = ""
+        globals()["block%s" % x].suffix = ""
         
         if x%2 != 0:
             globals()["block%s" % x].star = True
@@ -73,50 +72,40 @@ def fold_to_seq(path):
         seq.append(globals()["block%s" % x])
 
 
-    for x in range(1,len(path)): 
+    for x in range(3,fp_length):
+
+        #second to last block \
+        print(type(globals()["block%s" % int(x-1)].suffix)) 
+        print("suffix",globals()["block%s" % int(x-1)].suffix)
+
+
+        print(type(globals()["block%s" % int(x-1)].praefix)) 
+        print(globals()["block%s" % int(x-1)].praefix)
+
+        if len(globals()["block%s" % int(x-1)].suffix ) == 0:
+            globals()["block%s" % int(x-1)].suffix = domains[domain_pointer]
+
+        else:
+            globals()["block%s" % int(x-1)].suffix = globals()["block%s" % int(x-1)].suffix + ' ' +  domains[domain_pointer]
+
+        print("globals suffix", globals()["block%s" % int(x-1)].suffix)
+
+        #last block
+        suffix_split = globals()["block%s"  % int(x-1)].suffix.split()
+        suffix_rev = " ".join(suffix_split[::-1])
+
+
+        praefix_split = globals()["block%s"  % int(x-1)].praefix.split()
+        praefix_rev = " ".join(praefix_split[::-1])
         
-        for y in range(1,len(path[x])-1):
-            
-                z = False
-                try:
-                    if path[x-1][path[x][y]] == 0:
-                        z = True
-                except:
-                    pass
-                if path[x][y] > path[x-1][y] and path[x-1][y] > 0 and z == False: #and allready_paired(x,y,path[x][y],path) == False:
-                    #globals()["block%s" % y].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % y].praefix
-                    #domain_pointer += 1
-                    globals()["block%s" % y].suffix = globals()["block%s" % y].suffix+ " " + domains[domain_pointer]
+        globals()["block%s" % x].praefix = suffix_rev
+        globals()["block%s" % x].suffix = praefix_split
+    
+        globals()["block%s" % x].suffix = " ".join(praefix_split)
 
-                    praefix_split = globals()["block%s"  % y].praefix.split()
-                    praefix_rev = " ".join(praefix_split[::-1])
+        
+        domain_pointer += 1
 
-                    suffix_split = globals()["block%s"  % y].suffix.split()
-                    suffix_rev = " ".join(suffix_split[::-1])
-
-                    #globals()["block%s" % path[x][y]].suffix =  praefix_rev
-                    globals()["block%s" % path[x][y]].praefix = domains[domain_pointer]
-                    domain_pointer += 1
-                """  
-                if path[x][y+1] == 0:
-                    t = y 
-
-                    #praefix addition + modification
-                    globals()["block%s" % t].praefix  = domains[domain_pointer] + " " + globals()["block%s"  % t].praefix
-                    
-                    #print("else", globals()["block%s" % path[x][t]].suffix)
-                    globals()["block%s" % path[x][t]].suffix = globals()["block%s" % t].praefix[::-1] 
-                    domain_pointer += 1
-
-                    #suffix addition + modification
-                    globals()["block%s" % t].suffix = globals()["block%s" % t].suffix + " " + domains[domain_pointer]
-                    
-                
-                    globals()["block%s" % path[x][t]].praefix = globals()["block%s" % t].suffix[::-1] 
-                    domain_pointer += 1
-
-                """
-                    
     #part which adds * notation for complementary
 
     for x in range(1,len(seq)+1):
@@ -130,7 +119,7 @@ def fold_to_seq(path):
 
     comb_modules = []
     for x in range(1,len(seq)+1):
-        comb_module = globals()["block%s" %x].praefix + " " + globals()["block%s" %x].name + " " + globals()["block%s" %x].suffix
+        comb_module = str(globals()["block%s" %x].praefix) + " " + str(globals()["block%s" %x].name) + " " + str(globals()["block%s" %x].suffix)
         comb_modules.append(comb_module)
 
     
@@ -167,6 +156,6 @@ if __name__== "__main__":
     
 
     
-    print(fold_to_seq(path))
+    print(fold_to_seq(12))
         
    
