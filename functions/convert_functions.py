@@ -519,13 +519,6 @@ def afp_to_domainfp(afp,domain_seq):
                     path += "."
                     
 
-        domain_fp[x].append(path)
-
-    return domain_fp
-
-
-
-
 if __name__=="__main__":
 
     #print("convert_functions")
@@ -537,5 +530,6 @@ if __name__=="__main__":
     #only_b_domainfp("b   l  A B C  l  c b a".split(),[['..'], ['(..)..'], ['..(((.)))']])
     #print(differnt_l_domains("l l l l l l l l l l")),, "
     #print(afp_to_domainfp([["."],["()"]],domain_seq="b l b* a* l"))
-    print(afp_to_domainfp([["."],["()"],[".()"],["()()"],[".()()"],["()()()"],[".()()()"],["()()()()"],[".()()()()"],["()()()()()"],[".()()()()()"],["()()()()()()"]],domain_seq="b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* "))
-    
+    #print(afp_to_domainfp([["."],["()"],[".()"],["()()"],[".()()"],["()()()"],[".()()()"],["()()()()"],[".()()()()"],["()()()()()"],[".()()()()()"],["()()()()()()"]],domain_seq="b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* ".split())
+    print(extended_domain_path(("b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* ").split()))
+    print(afp_to_domainfp([["."],["()"],["()."],["(())"]],"a b c l b* a* l b l c* b* a* "))

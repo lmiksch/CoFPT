@@ -75,12 +75,12 @@ def fold_to_seq(fp_length):
     for x in range(3,fp_length):
 
         #second to last block \
-        print(type(globals()["block%s" % int(x-1)].suffix)) 
-        print("suffix",globals()["block%s" % int(x-1)].suffix)
+        #print(type(globals()["block%s" % int(x-1)].suffix)) 
+        #print("suffix",globals()["block%s" % int(x-1)].suffix)
 
 
-        print(type(globals()["block%s" % int(x-1)].praefix)) 
-        print(globals()["block%s" % int(x-1)].praefix)
+        #print(type(globals()["block%s" % int(x-1)].praefix)) 
+        #print(globals()["block%s" % int(x-1)].praefix)
 
         if len(globals()["block%s" % int(x-1)].suffix ) == 0:
             globals()["block%s" % int(x-1)].suffix = domains[domain_pointer]
@@ -88,7 +88,7 @@ def fold_to_seq(fp_length):
         else:
             globals()["block%s" % int(x-1)].suffix = globals()["block%s" % int(x-1)].suffix + ' ' +  domains[domain_pointer]
 
-        print("globals suffix", globals()["block%s" % int(x-1)].suffix)
+        #print("globals suffix", globals()["block%s" % int(x-1)].suffix)
 
         #last block
         suffix_split = globals()["block%s"  % int(x-1)].suffix.split()
@@ -99,9 +99,9 @@ def fold_to_seq(fp_length):
         praefix_rev = " ".join(praefix_split[::-1])
         
         globals()["block%s" % x].praefix = suffix_rev
-        globals()["block%s" % x].suffix = praefix_split
-    
-        globals()["block%s" % x].suffix = " ".join(praefix_split)
+        #globals()["block%s" % x].suffix = praefix_split
+        
+        globals()["block%s" % x].suffix = " ".join(praefix_rev)
 
         
         domain_pointer += 1
@@ -154,7 +154,9 @@ if __name__== "__main__":
 
     path = [[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 2, 1, 4, 3], [5, 0,5,4,3,2],[6,2,1,4,3,6,5]]
     
-
+    #Out:
+    #b l0 b* a* l1 a b c l2 c* b* a* d* l3 d a b c e l4 e* c* b* d* a* f* l5
+    #b l0 b* a* l1 a b c l2 c* b* a* d* l3 d a b c e l4 e* c* b* a* d* 
     
     print(fold_to_seq(12))
         
