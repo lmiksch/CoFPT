@@ -200,8 +200,8 @@ def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
         return 5
     elif domain[0] == "l":
-        return round(int(domain[1])) + 5
-    return 3 
+        return 5 # + round(int(domain[1])) 
+    return 4 
 
 
 def convert_UL_list(seq):
@@ -352,14 +352,190 @@ def differnt_l_domains(domain_seq):
         
     return " ".join(split_seq)
 
+
+"""
+def afp_to_domainfp(afp,domain_seq):
+    Takes an abstract folding path and a domain level sequence and converts it into a domain level path 
+        Example: 
+            afp: [["."],["()"],[".()"],["()()"]],domain_seq="b l b* a* l a b c d l d* c* b*"
+
+            returns [[".."],["(.).."],["..((.))..."],["(.)...(((.)))"]]
+    
+    domain_fp = [[] for _ in afp]
+    domain_seq = domain_seq.split()
+
+    for x,cur_path in enumerate(afp):
+
+        print(x)
+        print(cur_path[0])
+
+        module_index = -1
+        path = ""
+        
+        for i,domain in enumerate(domain_seq):
+            print("\n")
+            #print("module index", module_index)
+            print("domain",domain)
+            if domain == "l":
+                path += "."
+                module_index += 1
+
+                if module_index == x:
+                    print("done with folding step")
+                    domain_fp[x].append(path)
+                    break 
+                else:
+                    print("test1:",module_index,x)
+                
+                    
+
+            print(cur_path[0][module_index+1])
+            if cur_path[0][module_index+1] == ".":
+                path += "."
+
+
+            elif cur_path[0][module_index + 1] == "(" and domain != "l": 
+                print("(--------------------")
+                
+                j = i
+                k = x -1
+                while k <= len(afp[x]):
+                    print(k)
+                    print("her:",cur_path[0][k])
+                    if cur_path[0][k] == ")":
+                        print(domain_seq[i],domain_seq[j])
+                        if is_star_pair(domain_seq[i],domain_seq[j]):
+                            print("success")
+                            path += "("
+                            print(path)
+                            break
+                    j += 1
+                    if domain_seq[j] == "l":
+
+                        k += 1 
+                
+
+
+            elif cur_path[0][module_index + 1] == ")" and domain != "l":
+                print("xxxxxxxxxx)")
+                
+                j = i - 1
+                k = x 
+                while  0 <= k:
+                    print("k = ",k)
+                    print("her:",cur_path[0][k])
+
+                    if cur_path[0][k] == ")":
+                        print(domain_seq[i],domain_seq[j])
+                        if is_star_pair(domain_seq[i],domain_seq[j]):
+                            print("success",path,"end path")
+                            path += ")"
+                            print("success",path,"end path")
+                            break
+                    
+                    j -= 1
+                    if domain_seq[j] == "l":
+
+                        k -= 1 
+                path += "."
+        print("---------------------------------------------")
+        print("Path:",path)
+        domain_fp[x].append(path)
+
+    return domain_fp
+"""
+
+
+def afp_to_domainfp(afp,domain_seq):
+    """Takes an abstract folding path and a domain level sequence and converts it into a domain level path 
+        Example: 
+            afp: [["."],["()"],[".()"],["()()"]],domain_seq="b l b* a* l a b c d l d* c* b*"
+
+            returns [[".."],["(.).."],["..((.))..."],["(.)...(((.)))"]]
+    """
+    domain_fp = [[] for _ in afp]
+    domain_seq = domain_seq.split()
+
+    for x,cur_path in enumerate(afp):
+        module_index = 0
+        path = ""
+
+        for i,domain in enumerate(domain_seq):
+            #print("module index", module_index)
+
+            if domain == "l":    
+                module_index += 1
+
+                if module_index == x + 1:
+                    path += '.'
+                    break 
+
+                else:
+                    path += "."
+                    
+
+            if cur_path[0][module_index] == ".":
+                path += "."
+                
+            elif cur_path[0][module_index] == "(" and domain != "l": 
+                j = i
+                k = module_index
+                added_notation = False
+                
+                while k <= len(afp[x][0]) and j <= len(domain_seq) -1 :
+                    
+                    if cur_path[0][k] == ")":
+                        
+                        if is_star_pair(domain_seq[i],domain_seq[j]):
+                            path += "("
+                            added_notation = True
+                            break
+                    
+                    if domain_seq[j] == "l":
+                        k += 1 
+                    j += 1    
+                if added_notation != True:
+                    path += "."
+                    
+
+            elif cur_path[0][module_index] == ")" and domain != "l":
+                j = i 
+                k = module_index
+                added_notation = False 
+                while  0 <= k and 0 <= j:
+                    if cur_path[0][k] == "(":
+                        
+                        if is_star_pair(domain_seq[i],domain_seq[j]):
+                            path += ")"     
+                            added_notation = True
+                            break
+
+                    j -= 1
+
+                    if domain_seq[j] == "l":
+                        k -= 1 
+
+                if added_notation != True:
+                    path += "."
+                    
+
+        domain_fp[x].append(path)
+
+    return domain_fp
+
+
+
+
 if __name__=="__main__":
 
-    #print("convert_functions")bbbbbl0l0l0l0l0FFFAAABBBBBCCCGGGl1l1l1l1l1l1l1dddcccbbbbbaaaeeel2l2l2l2l2l2l2l2EEEAAABBBBBCCCDDDl3l3l3l3l3l3l3l3l3hhhgggcccbbbbbaaafffiiil4l4l4l4l4l4l4l4l4l4lIIIFFFAAABBBBBCCCGGGHHH
+    #print("convert_functions")
     #print(path_to_pairtablepath(['.', '()', '.()', '(())']))
     #get_module_fp_sequences("AAABBBBBCCCLLLCCCBBBBBAAALLLBBBBBBBBBB")
     #print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))
 
     #print(UL_list("a aa* c av* a d e b b* bbb*".split()))
     #only_b_domainfp("b   l  A B C  l  c b a".split(),[['..'], ['(..)..'], ['..(((.)))']])
-    print(differnt_l_domains("l l l l l l l l l l"))
+    #print(differnt_l_domains("l l l l l l l l l l")),, "
+    #print(afp_to_domainfp([["."],["()"]],domain_seq="b l b* a* l"))
+    print(afp_to_domainfp([["."],["()"],[".()"],["()()"],[".()()"],["()()()"],[".()()()"],["()()()()"],[".()()()()"],["()()()()()"],[".()()()()()"],["()()()()()()"]],domain_seq="b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* "))
     

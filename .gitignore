@@ -11,3 +11,7 @@
 /test.seq
 /test.svg
 /tmp_out.png
+
+
+*.drf 
+*_IR_out.txt
