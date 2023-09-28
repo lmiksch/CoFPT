@@ -517,12 +517,45 @@ def afp_to_domainfp(afp,domain_seq):
 
                 if added_notation != True:
                     path += "."
-                    
+
+
+def find_connected_modules(afp):
+    """ Identifies connected Modules and returns the indices of the connected modules in a list. Each sublist corresponds to connected modules. 
+
+
+    Args: 
+        afp(list): abstract folding path in the form of a pairtable
+    
+    Returns: 
+        connected_modules(list): sublist corresponds to connected modules with indices 
+    """
+    all_module = range(1,len(afp))
+    connected_modules = []
+    done = False 
+    curr_module = 1
+    while done == False:
+
+        for x,step in enumerate(afp):
+            print(step)
+            connected_modules.append(step[curr_module])
+            all_module.remove(step[curr_module])
+            
+
+        
+
+
+
+
+    
+
+
 
 if __name__=="__main__":
 
     #print("convert_functions")
     #print(path_to_pairtablepath(['.', '()', '.()', '(())']))
+
+
     #get_module_fp_sequences("AAABBBBBCCCLLLCCCBBBBBAAALLLBBBBBBBBBB")
     #print(extended_domain_path("vbulj*d*a*b*c*e*k*ltmifcbaghnslr*o*h*g*a*b*c*f*i*p*q*lzwqpifcbaghorxyly*x*r*o*h*g*a*b*c*f*i*p*q*w*z*lkecbadjlu*b*v*lblb*"))
 
@@ -531,5 +564,8 @@ if __name__=="__main__":
     #print(differnt_l_domains("l l l l l l l l l l")),, "
     #print(afp_to_domainfp([["."],["()"]],domain_seq="b l b* a* l"))
     #print(afp_to_domainfp([["."],["()"],[".()"],["()()"],[".()()"],["()()()"],[".()()()"],["()()()()"],[".()()()()"],["()()()()()"],[".()()()()()"],["()()()()()()"]],domain_seq="b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* ".split())
-    print(extended_domain_path(("b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* ").split()))
-    print(afp_to_domainfp([["."],["()"],["()."],["(())"]],"a b c l b* a* l b l c* b* a* "))
+    #print(extended_domain_path(("b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* ").split()))
+    #print(afp_to_domainfp([["."],["()"],["()."],["(())"]],"a b c l b* a* l b l c* b* a* "))
+
+
+    print(find_connected_modules([[0, 0], [2, 2, 1], [3, 0, 3, 2], [4, 4, 3, 2, 1]]))

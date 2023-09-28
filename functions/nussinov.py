@@ -1,14 +1,18 @@
 """
 Nussinov-Jacobson python algorithm implementation
-	Predicts the secondary RNA structure from an RNA sequence.
+	Predicts the secondary RNA structure from a domain level RNA sequence.
 	The minimal loop length is set to a default of 0
-	Argument: String: takes a string with * notation as input 
+	Argument: 
+		String: takes a string with * notation as input 
 """
 
 import numpy as np
 import itertools
 import pandas as pd
-from functions import convert_functions as cv 
+try: 
+	from functions import convert_functions as cv 
+except: 
+	import convert_functions as cv 
 
 def couple(pair):
 	if pair[0].upper() == pair[1].upper() and pair[0] != pair[1]:
@@ -375,7 +379,6 @@ def nussinov_modules(rna):
 	UL_liste = cv.UL_list(rna.split())
 	domain_folds = get_domain_folds(nussi_output,UL_liste)
 	
-	possible_paths = find_possible_structs(domain_folds)
 
 	return possible_paths, nussi_output
 
@@ -385,7 +388,7 @@ def nussinov_modules(rna):
 
 if __name__ == "__main__":
 	# Test
-	print("nussi output:",nussinov_modules(" b   l  d* aa* b* c* e*  l  i f c  b  aa g h  l  h* g* aa* b* c* f* i*  l  j e c  b  aa d k  l  k* d* aa* b* c* e* j*"))
+	#print("nussi output:",nussinov_modules(" b   l  d* aa* b* c* e*  l  i f c  b  aa g h  l  h* g* aa* b* c* f* i*  l  j e c  b  aa d k  l  k* d* aa* b* c* e* j*"))
 	
-
-
+	print(nussinov("b l b* l b l b*"))
+	#print(nussinov("b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*  l  h f d a b c   e   g i  l  i* g* e* c* b* a* d* f* h* j*  l  j h f d a b c   e   g   i  l   b* "))

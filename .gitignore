@@ -12,6 +12,6 @@
 /test.svg
 /tmp_out.png
 
-
+#Ignore Test outputs
 *.drf 
 *_IR_out.txt

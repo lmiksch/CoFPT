@@ -10,7 +10,7 @@ def objective_function(fe,efe,mse,barrier):
     """
     Function exists to only change one thing when changing the obj function
     """
-
+    
     obj_fun = "(fe - efe) + barrier*0.1"
     score = eval(obj_fun.format(fe=fe,efe=efe,barrier=barrier))
     return score,obj_fun
@@ -141,10 +141,12 @@ def add_folding_path_constraint(path,UL_seq,model):
         model : model created in infrared sampler
     """
 
-
+    print(path)
+    print(UL_seq)
     ext_path = domain_path_to_nt_path(path,UL_seq)
 
     for x in ext_path: 
+        print(x)
         cons = []
         bps = rna.parse(x)
         cons = [rna.BPComp(i,j) for (i,j) in bps]
@@ -213,7 +215,7 @@ def current_scores(nt_seqfp,extended_fp,seq,d_seq):
         print("barrier",barrier)
         
 
-        scores.append(objective_function(fe,efe,mse,barrier)[0])
+        scores.append(objective_function(fe,efe,mse,barrier)[0])E
         
 """
 
@@ -280,13 +282,13 @@ def rna_design(seq,path,out):
     UL_liste = cv.UL_list(split_seq)
 
     #identicaldomains(True)
-    """
+    
     ir.def_constraint_class(
             "IdenticalDomains",
             lambda i,j: [i,j],
             lambda x,y: x == y,
             module  = __name__ 
-        )"""
+        )
 
     
 
@@ -298,16 +300,16 @@ def rna_design(seq,path,out):
     print("Running Calculations")
     model = ir.Model(seqlen,4)
 
-
+    print(path)
     add_folding_path_constraint(path,UL_liste,model)
 
 
     #applies constraint, that same domains should have the same sequence
     unique_domains = "".join(set(UL_liste))
-    #for domain in  unique_domains:
+    for domain in  unique_domains:
 
-     #   if domain != "l":
-      #      identical_domains_constraint(domain,UL_liste,model)
+        if domain != "l":
+            identical_domains_constraint(domain,UL_liste,model)
 
 
     #optimization
@@ -319,7 +321,6 @@ def rna_design(seq,path,out):
     #addition of energy to our model 
     
     for x in extended_fp: 
-            print(x)
             ss = rna.parse(x)
             model.add_functions([rna.BPEnergy(i, j, (i-1, j+1) not in ss)
         for (i,j) in ss], 'energy')
@@ -327,6 +328,7 @@ def rna_design(seq,path,out):
             model.add_feature('Energy', 'energy',
              lambda sample, target=x:
                     RNA.energy_of_struct(rna.ass_to_seq(sample), target))
+            
 
     #model.set_feature_weight(energy, 'energy')
     
@@ -346,7 +348,7 @@ def rna_design(seq,path,out):
 
 
     def rstd_objective(sequence,score_list = False):
-    
+        
         split_nt_sequence = []
         #creates a list of list where each sublist i corresponds to the sequence at transcription step i 
         l_pointer = 0
@@ -358,7 +360,6 @@ def rna_design(seq,path,out):
         
         
         nt_path = []
-
         for x in range(len(UL_liste)):
             if UL_liste[x][0] == "l":
             
@@ -368,9 +369,17 @@ def rna_design(seq,path,out):
         
 
         total = []
-        #print(nt_path)
-        for x in range(1,len(extended_fp)):
 
+        # add score for first folding step
+        fc = RNA.fold_compound(nt_path[0])
+        fe = fc.eval_structure(extended_fp[0].replace(".","x"))
+        efe = constrained_efe(nt_path[0],extended_fp[0])
+        mse = 0
+        barrier = 0
+        obj_score = objective_function(fe,efe,mse,barrier)[0]
+        total.append(obj_score)
+
+        for x in range(1,len(extended_fp)):
             #prepare input for finpath 
             
             ss1 = extended_fp[x-1] + ("." * (len(nt_path[x])-len(nt_path[x-1])))
@@ -389,19 +398,7 @@ def rna_design(seq,path,out):
                 deltaE = 99
                 barrier = 99
 
-            """ 
-            E_1_fc = RNA.fold_compound(nt_path[0])
-            E_1 = E_1_fc.eval_structure(extended_fp[0].replace(".","x"))
-            
 
-            E_i_fc = RNA.fold_compound(nt_path[x])
-            E_i = E_i_fc.eval_structure(extended_fp[x].replace(".","x"))
-
-            E_i1_fc = RNA.fold_compound(nt_path[x-1])
-            E_i1 = E_i1_fc.eval_structure(extended_fp[x-1].replace(".","x"))
-
-            deltaE = E_i - E_i1
-            mse = (deltaE - (fe - E_i)/x)**2"""
             mse = 0
             global factor
 
@@ -437,13 +434,14 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 4000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 1, temp = 0.04)
 
 
 
     print("\n")#
     #Output generation
     f = open(str(out) + "_IR_out.txt", "a")
+    f.write(" \n")
     print("Calculated NT sequence:")
     f.write("Calculated NT sequence: \n")
     print(rna.ass_to_seq(best), -best_val)
@@ -463,9 +461,8 @@ def rna_design(seq,path,out):
     #Visualization
     
     
-    final_scores = rstd_objective(str(rna.ass_to_seq(best)),score_list=True)   #current_scores(ntseq_fp,extended_fp,str(rna.ass_to_seq(best)),d_seq)
-    
-    final_scores.insert(0,0)
+    final_scores = rstd_objective(str(rna.ass_to_seq(best)),score_list=True)   
+    print("final scores: ",final_scores)
     i = 0
     print("\n")   
     f.write(seq)
@@ -483,6 +480,7 @@ def rna_design(seq,path,out):
         f.write(" \n")
         f.write(mfe_struct)
         f.write("  Score: ")
+        print(str(final_scores[i]))
         f.write(str(final_scores[i]))
         f.write(" \n")
         print("")
