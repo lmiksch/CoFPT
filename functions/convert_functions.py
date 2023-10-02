@@ -790,8 +790,8 @@ def extended_domain_path(domain_path):
 
     return "".join(full_path)
 
-def split_ntseq_to_domainfp(nt_seq,domain_seq):
-    """Takes a nucleotide sequence and splits it up in subsequences where each sequence i corresponds to the sequence at transcription step i 
+"""def split_ntseq_to_domainfp(nt_seq,domain_seq):
+    Takes a nucleotide sequence and splits it up in subsequences where each sequence i corresponds to the sequence at transcription step i 
 
         Args: 
             nt_seq (string): nucleotide sequence
@@ -801,7 +801,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
         Returns:   
             nt_path (list): list where each sublist corresponds to sequence at transcription step
     
-    """
+    
 
     split_seq = domain_seq.split()
         
@@ -825,7 +825,7 @@ def split_ntseq_to_domainfp(nt_seq,domain_seq):
             nt_path.append("".join(split_nt_sequence[:x+1]))
     nt_path.append(nt_seq)
 
-    return nt_path
+    return nt_path"""
 
 
 def is_star_pair(a,b):
@@ -1154,5 +1154,5 @@ if __name__=="__main__":
 
 
     print(find_connected_modules([[0, 0], [2, 2, 1], [3, 2, 1, 0], [4, 0, 0, 4, 3],[5,0,0,0,0,0],[6,0,0,0,0,6,5]]))
-
+    print(extended_domain_path(convert_UL_list("b l0 b* a* l1 a b c l2 c* b* a* d* l3 d a b c e l4 e* c* b* a* d* f* l5 f d a b c e g l6 g* e* c* b* a* d* f* h* l7 h f d a b c e g i l8".split())))
                 
