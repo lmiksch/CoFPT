@@ -3,7 +3,7 @@ import argparse
 
 def parse_drt_out(domain_seq,fp,dr_out):
     #write function which extends fp for comparison to drt output
-    extended_fp = cv.extended_fp_path(fp,domain_seq)
+    extended_fp = cv.domain_path_to_nt_path(fp,cv.convert_UL_list(domain_seq.split()))
     populations = []
     i = 0
     for x in range(1,len(dr_out)):

@@ -1,8 +1,12 @@
 import infrared as ir 
 from infrared import rna
 import RNA 
-from functions import convert_functions as cv
-from functions import nussinov
+try:
+    from functions import convert_functions as cv
+    from functions import nussinov
+except:
+    import convert_functions as cv 
+    import nussinov
 import random
 import math
 
@@ -23,7 +27,7 @@ def couple(pair):
 #could be changed to have custom input for the different domains domain length now defined in functions/convert_functions
 """def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
-        return 5
+        return 5d_length
     elif domain[0] == "l":
         return round(domain[1]*1.5) + 5
     return 3 """
@@ -40,7 +44,7 @@ def identical_domains_constraint(domain,UL_seq,model):
     for x in range(len(UL_seq)):
         if UL_seq[x] == domain:
             i_pointer = 0
-            j_pointer = i_pointer
+            
 
             for u in UL_seq[:x]:
                 
@@ -69,6 +73,54 @@ def identical_domains_constraint(domain,UL_seq,model):
                 j_pointer += 1
 
 
+def add_b_half_domain(UL_seq,model): # currently not included since constraint is added with folding path constraint
+
+    for x in range(len(UL_seq)):
+        if UL_seq[x] == "z":
+            i_pointer = 0
+            
+            
+            for u in UL_seq[:x]:
+                
+                i_pointer += cv.d_length(u)
+            
+            
+            j_pointer = i_pointer
+
+
+            q = x
+            while UL_seq[q] != "b":
+                j_pointer += cv.d_length(UL_seq[q])
+                
+                q += 1
+            j_pointer += cv.d_length("b")
+
+            if i_pointer > j_pointer:
+                print("i_pointer > j_pointer somethings wrong")
+                return
+
+    
+            for z in range(cv.d_length("z")):
+                
+                
+                if i_pointer != j_pointer:    
+                    model.add_constraints(rna.BPComp(i_pointer,j_pointer))
+                    
+
+                i_pointer += 1
+                j_pointer -= 1
+
+
+
+
+
+
+    print("done add b_half constraint")
+
+
+
+
+
 def one_domains(UL_seq):
     split_seq = "".join(set(UL_seq))
     return split_seq
@@ -90,17 +142,26 @@ def domain_path_to_nt_path(path,UL_seq):
     
     for x in range(len(path)):
         
-        
+        z_found = False 
         for z in range(len(path[x][0])):
-       
-            ext_path[x].append(path[x][0][z] * cv.d_length(UL_seq[z]))
+            
+            if UL_seq[z][0] == "z" and path[x][0][z] == "(":
+                ext_path[x].append("(((")
+                z_found = True
+                
+            elif UL_seq[z][0] == "b" and z_found and path[x][0][z] == ")":
+                ext_path[x].append(")))...")
+                z_found = False
+
+            else:    
+                ext_path[x].append(path[x][0][z] * cv.d_length(UL_seq[z]))
+
         ext_path[x] = "".join(ext_path[x])
 
-    
     return ext_path
 
 def call_findpath(seq, ss1, ss2, md, fpw, mxb = float('inf')):
-    """ Call ViennaRNA findpath. Modified from DrTransformer
+    """ Call ViennaRNA findpath. Modified from DrTransformerd_length
     """
     fc = RNA.fold_compound(seq)
     
@@ -275,7 +336,7 @@ def rna_design(seq,path,out):
     split_seq = seq.split()
     global d_seq
     d_seq = seq
-  
+    print("\n Splitseq ",split_seq)
     seqlen = 0
     no_space_seq = "".join(split_seq)
 
@@ -302,7 +363,9 @@ def rna_design(seq,path,out):
 
     print(path)
     add_folding_path_constraint(path,UL_liste,model)
-
+    
+    # adds b half domain in form of a z domain
+    #add_b_half_domain(UL_liste,model)
 
     #applies constraint, that same domains should have the same sequence
     unique_domains = "".join(set(UL_liste))
@@ -353,6 +416,7 @@ def rna_design(seq,path,out):
         #creates a list of list where each sublist i corresponds to the sequence at transcription step i 
         l_pointer = 0
         for z in split_seq:
+            
             r_pointer = l_pointer + cv.d_length(z)
             
             split_nt_sequence.append(sequence[l_pointer:r_pointer])
@@ -367,9 +431,8 @@ def rna_design(seq,path,out):
                 nt_path.append("".join(split_nt_sequence[:x+1]))
         nt_path.append(sequence)
         
-
+        
         total = []
-
         # add score for first folding step
         fc = RNA.fold_compound(nt_path[0])
         fe = fc.eval_structure(extended_fp[0].replace(".","x"))
@@ -381,7 +444,8 @@ def rna_design(seq,path,out):
 
         for x in range(1,len(extended_fp)):
             #prepare input for finpath 
-            
+    
+
             ss1 = extended_fp[x-1] + ("." * (len(nt_path[x])-len(nt_path[x-1])))
          
             efe = constrained_efe(nt_path[x],extended_fp[x])
@@ -408,7 +472,7 @@ def rna_design(seq,path,out):
 
             
             #print("efe",efe)
-            #print("barrier",barrier)
+            #print("barrierIdenticalDomains(i_pointer,j_pointer)",barrier)
             obj_score = objective_function(fe,efe,mse,barrier)[0]
             
             total.append(obj_score) 
@@ -426,7 +490,6 @@ def rna_design(seq,path,out):
 
         if score_list:
             return total
-
         #print("total after", total)    
         return sum(total)
 
@@ -434,7 +497,7 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 1, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 1000, temp = 0.04)
 
 
 
@@ -487,9 +550,10 @@ def rna_design(seq,path,out):
     f.write(" \n")
 
     print("\n")
-    #output include all folding path structures so (),().,()(), with rnafold
+    #output include all folIdenticalDomains(i_pointer,j_pointer)ding path structures so (),().,()(), with rnafold
     #print(cv.extended_domain_path(UL_liste))
     f.write(cv.extended_domain_path(UL_liste))
+    f.write("\n")
     
     return rna.ass_to_seq(best), best_val
 
@@ -540,9 +604,10 @@ if __name__ == "__main__":
     path = [['..'], ['(...)...'], ['...(((...)))..'], ['(...)...(((((.))))).'], ['..(((((.(((((.)))))..)))))..'], ['(...)...(((((.))))).(((((((.)))))))']]
     
 
-
-
-    rna_design(seq,path)
+    seq1 = " z l b l b* l b"
+    path1 = [[".."],["(.)."],["..(.)."],["(.).(.)"]]
+    #add_b_half_domain(cv.convert_UL_list(seq1.split()),path)
+    rna_design(seq1,path1,out=0)
 
 
     

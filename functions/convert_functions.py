@@ -279,33 +279,6 @@ def is_star_pair(a,b):
             return True
         
 
-def extended_fp_path(domain_path,domain_seq):
-    """ Extends domain level folding path to the corresponding dot-bracket path  
-
-    Args:
-        domain_path (list): sublist correspond to  path sequence
-    
-    Returns: 
-        full_path (list): extended path 
-
-    """
-
-    full_path = []
-
-    domain_seq = convert_UL_list(domain_seq.split()) 
-    
-    for z in range(len(domain_path)):
-        ext_path = []
-        for x in range(len(domain_path[z][0])):  
-            #if domain_seq[x] != "l":
-                ext_path.append(domain_path[z][0][x] * d_length(domain_seq[x]))
-           # else:
-               # ext_path.append("." * d_length(domain_seq[x]))
-     
-            
-        full_path.append("".join(ext_path))
-
-    return full_path
 
 def UL_list(list):
     """ Converts a list of domains into UL list
@@ -754,9 +727,11 @@ def only_b_domainfp(seq,path):
 
 def d_length(domain):
     if domain[0] == "b" or domain[0] == "B":
-        return 5
+        return 6
     elif domain[0] == "l":
-        return 5 # + round(int(domain[1])) 
+        return 6 # + round(int(domain[1])) 
+    elif domain[0] == "z":
+        return 3 
     return 4 
 
 
@@ -790,42 +765,6 @@ def extended_domain_path(domain_path):
 
     return "".join(full_path)
 
-"""def split_ntseq_to_domainfp(nt_seq,domain_seq):
-    Takes a nucleotide sequence and splits it up in subsequences where each sequence i corresponds to the sequence at transcription step i 
-
-        Args: 
-            nt_seq (string): nucleotide sequence
-            domain_seq (string: domain level sequence 
-
-        
-        Returns:   
-            nt_path (list): list where each sublist corresponds to sequence at transcription step
-    
-    
-
-    split_seq = domain_seq.split()
-        
-    split_nt_sequence = []
-    UL_seq = UL_list(split_seq)
-        
-    l_pointer = 0
-    for z in split_seq:
-        r_pointer = l_pointer + d_length(z)
-            
-        split_nt_sequence.append(nt_seq[l_pointer:r_pointer])
-        l_pointer = r_pointer
-        
-    
-        
-    nt_path = []
-
-    for  x in range(len(UL_seq)):
-        if UL_seq[x][0] == "l":
-                
-            nt_path.append("".join(split_nt_sequence[:x+1]))
-    nt_path.append(nt_seq)
-
-    return nt_path"""
 
 
 def is_star_pair(a,b):
@@ -862,6 +801,44 @@ def extended_fp_path(domain_path,domain_seq):
         full_path.append("".join(ext_path))
 
     return full_path
+
+def domain_path_to_nt_path(path,UL_seq):
+    """ Domain_path_to_nt_path
+
+    Takes the domain level path and extends the number of the base pairings corresponding to their length: ( with length 5 --> (((((
+
+    args:
+        path (list): domain level path 
+        UL_seq (list): upper lower case sequence 
+    
+    Returns:
+        ext_path (list): where each sublist corresponds to the extended domain path
+    """
+
+    ext_path = [[] for x in path]
+    
+    for x in range(len(path)):
+        
+        z_found = False 
+        for z in range(len(path[x][0])):
+            
+            if UL_seq[z][0] == "z" and path[x][0][z] == "(":
+                ext_path[x].append("(((")
+                z_found = True
+                
+            elif UL_seq[z][0] == "b" and z_found and path[x][0][z] == ")":
+                ext_path[x].append(")))...")
+                z_found = False
+
+            else:    
+                ext_path[x].append(path[x][0][z] * d_length(UL_seq[z]))
+
+        ext_path[x] = "".join(ext_path[x])
+
+    return ext_path
+
+
+
 
 def UL_list(list):
     """ Converts a list of domains into UL list
