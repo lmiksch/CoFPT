@@ -147,4 +147,4 @@ path_8_steps = [['..'],["(.)."], ['..(.)..'], ['(.).((.))..'], ['..(.)..(((.))).
 
 d_seq_8_steps = "z l b   l   b* a*  l  a b c  l  c* b* a* d*  l  d a b c e  l  e* c* b* a* d* f*  l  f d a b c   e g  l  g* e* c* b* a* d* f* h*"
 
-custom_path(d_seq_8_steps,path_8_steps)
+custom_path(d_seq_6_steps,path_6_steps)

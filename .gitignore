@@ -15,3 +15,4 @@
 #Ignore Test outputs
 *.drf 
 *_IR_out.txt
+*.out
