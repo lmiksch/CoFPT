@@ -135,5 +135,5 @@ def get_random_path(folding_paths):
     return(path)
 
 if __name__ == "__main__":
-    print("Hello")
+    print(find_structs("b B b B b B"))
 

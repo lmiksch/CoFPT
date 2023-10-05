@@ -497,10 +497,10 @@ def rna_design(seq,path,out):
     #[rstd-optimize-call]
     objective = lambda x: -rstd_objective(rna.ass_to_seq(x))
 
-    best, best_val = mc_optimize(model, objective,steps = 1000, temp = 0.04)
+    best, best_val = mc_optimize(model, objective,steps = 2000, temp = 0.04)
 
 
-
+    
     print("\n")#
     #Output generation
     f = open(str(out) + "_IR_out.txt", "a")
