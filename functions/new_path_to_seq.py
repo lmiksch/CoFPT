@@ -59,19 +59,30 @@ class graph():
     def print_nodes(self):
         for node in self.graph:
             print(node)
+
+    def create_edges(self,afp,nodes):
+        for step in afp[::-1]:
+            for x in range(1,step[0]):
+                if step[x] != 0:
+                    node1 = nodes[x]
+                    node2 = nodes[step[x]]
+                    
+                    self.add_edge(node1, node2)
+                else:
+                    continue
     
     def get_edges(self):
         
         for node in self.graph:
             for neighbor in node.neighbors:
-                self.edges.add(str(node.name) + str(neighbor.name))
+                self.edges.add((node.name , neighbor.name))
 
 
         #Remove duplicate edges
-        self.edges = {_ for _ in self.edges if int(_[1]) >= int(_[0])} 
+        self.edges = {_ for _ in self.edges if _[1] >= _[0]} 
 
     
-    
+    """
     def bipartite_check(self,connected_components):
         
 
@@ -97,7 +108,7 @@ class graph():
             for neighbor in current_node.neighbors:
                 if neighbor not in visited_nodes:
                     neighbor.complement = complement
-                    stack.append(neighbor)
+                    #stack.append(neighbor)
                     #visited_nodes[neighbor] = True
                 print("\ncurrent node:", current_node)
                 print("neighbor:",neighbor)
@@ -112,43 +123,89 @@ class graph():
                 neighbor.complement = not current_node.complement
 
         return True 
-    
+    """
+    def is_bipartite_dfs(self, node, visited_nodes, complement, connected):
+        visited_nodes[node] = True
+        node.complement = complement
+        
+        #print("is bipartite\n")
+        #print("\nVisited Nodes")
+        #for x in visited_nodes.keys():
+            #print("visitded nodes",x)
+        #print("")
+        for neighbor in node.neighbors:
+            #print("node: ",node)
+            #print("neighbor: ",neighbor)
+            if neighbor.name not in connected:
+                continue  # Skip neighbors not in the specified connected components
+
+            if neighbor not in visited_nodes:
+                
+                if not self.is_bipartite_dfs(neighbor, visited_nodes, not complement, connected):
+                    return False
+            else:
+                if neighbor.complement == node.complement:
+                    return False
+
+        return True
+
+    def bipartite_check(self, connected_components):
+        visited_nodes = {}
+        
+        for connected in connected_components:
+           # print("\nFollowing component will be analyzed", connected)    
+            for node in self.graph: 
+                #print("nodename",node.name)
+                #print("node name in connected",node.name in connected)
+                if node.name in connected and node not in visited_nodes:
+                    #print("here")
+                    if not self.is_bipartite_dfs(node, visited_nodes, True, connected):
+                        #print("h2")
+                        return False
+
+        return True
+
+
+
+
     def get_current_edges(self,step_number):
         current_edges = []
         for edge in self.edges:
-            if int(edge[1]) <= step_number + 1:
+            if edge[1] <= step_number + 1:
                 current_edges.append(edge)
         return current_edges
 
 
-    def get_inequalities(self):
+    def get_inequalities(self,afp):
         
         inequalities = []
 
         for x,step in enumerate(afp): 
             collected_edges = self.get_current_edges(x)
-            collected_edges = sorted(collected_edges, key=lambda x: -(int(x) // 10 % 10))
+            print("-"*50)
             print("\nCollected Edges",collected_edges)
             print("Current Step:",step)
             active_edges = []
             inactive_edges = []
             
             for edge in collected_edges:
-                if step[int(edge[0])] == int(edge[1]) and step[int(edge[1])] == int(edge[0]):
+                if step[edge[0]] == edge[1] and step[int(edge[1])] == int(edge[0]):
                     active_edges.append(edge)
                 else:
                     inactive_edges.append(edge)
+
+            active_edges.sort(key= lambda x: (x[1]))
             print("Active Edges",active_edges)
             print("Inactive Edges",inactive_edges)  
 
-
+            
             #Remove inactive edges which were allready defined
             if len(inequalities) > 0:    
                 for ineq in inequalities:
                     result = [[act, inact] for inact in inactive_edges for act in active_edges if ineq[0] == act and ineq[1] == inact]
-                    print(result)
+                    print(f"For ineq: {ineq} was following result found: {result}")
                     if result:
-                        print(f"Remove following edge {result[0][1]} du to result beeing {result}")
+                        print(f"Remove following edge {result[0][1]} due to result being {result}")
                         inactive_edges.remove(result[0][1])
 
             while len(inactive_edges) != 0: 
@@ -173,7 +230,7 @@ class graph():
                 for edge in neighbor_edge:
                     inequalities.append([current_edge,edge])
                     inactive_edges.remove(edge)
-
+            print("-"*50)
                 
 
             print(f"\nInequalities {inequalities}")
@@ -195,8 +252,6 @@ class graph():
 
 
 
-
-
 """Modules in Graph as nodes first initialize 
 
 
@@ -206,23 +261,24 @@ Args:
     
 """
 
-afp = [[1, 0], [2, 2, 1], [3, 0, 3, 2], [4, 4, 3, 2, 1]]
+#afp = [[1, 0], [2, 2, 1], [3, 0, 3, 2], [4, 4, 3, 2, 1]]
 
 afp = [[1,0],[2,2,1],[3,0,3,2],[4,4,3,2,1],[5,0,3,2,5,4],[6,6,3,2,5,4,1]]
 #afp = [[1,0],[2,2,1],[3,0,3,2],[4,4,3,2,1],[5,5,0,4,3,1]]
-afp = [".","()",".()","(())","(.())","()()()","()(.())"]
+#afp = [".","()",".()","(())","(.())","(())()",".()(())",".(.(()))"]
 #create a module/node for each module in the folding path present at the last step and append it to the graph
 
 def build_graph(afp):
 
-    if afp[0][0] != int:
-        afp = cv.path_to_pairtablepath(afp)
-
-    print(afp)
+    if afp[0][0] == ".":
+        pairtable_afp = cv.path_to_pairtablepath(afp)
+    else:
+        pairtable_afp = afp
+    print(pairtable_afp)
 
 
     afp_graph = graph()
-    afp_graph.create_nodes_from_pairtable(afp)
+    afp_graph.create_nodes_from_pairtable(pairtable_afp)
 
     #print(afp_graph)
 
@@ -232,17 +288,8 @@ def build_graph(afp):
     nodes = list(afp_graph.graph.keys())
     nodes.insert(0,0)
 
-    print("begin \n")
-    for step in afp[::-1]:
-        for x in range(1,step[0]):
-            if step[x] != 0:
-                node1 = nodes[x]
-                node2 = nodes[step[x]]
-                
-                afp_graph.add_edge(node1, node2)
-            else:
-                continue
-
+    afp_graph.create_edges(pairtable_afp,nodes)
+    
     # Print the graph after adding edges
     print("Graph after adding edges:")
     afp_graph.print_nodes()
@@ -250,7 +297,7 @@ def build_graph(afp):
     
     print("Edges: ", afp_graph.edges)
 
-    connected_components = cv.find_connected_modules(afp)
+    connected_components = cv.find_connected_modules(pairtable_afp)
     print("\nFollowing Nodes are connected:")
     for component in connected_components:
         nodes_in_component = set()
@@ -258,20 +305,19 @@ def build_graph(afp):
             nodes_in_component.add(nodes[node_index])
         print(component)
 
-        if not afp_graph.bipartite_check(component):
-            raise ImportError("Graph not Bipartite can't design domain level sequence. Check your input")
+    if not afp_graph.bipartite_check(connected_components):
+        raise ImportError("Graph not Bipartite can't design domain level sequence. Check your input")
 
     print("\nBipartite Check Complete:")
     for x in afp_graph.graph:
         print(x)
 
-    inequalities = afp_graph.get_inequalities()
+    inequalities = afp_graph.get_inequalities(afp=pairtable_afp)
 
-    final_edges = afp_graph.get_current_edges(len(afp))
+    final_edges = afp_graph.get_current_edges(len(pairtable_afp))
     print("\n Final Inequalities",inequalities)
-    inequality_solver.inequality_solver(inequalities,final_edges)
+    inequalities_solutions = inequality_solver.inequality_solver(inequalities,final_edges)
 
-
-
-    
-build_graph(afp)
+    print(inequalities_solutions)
+if __name__ == "__main__":
+    build_graph(afp)
